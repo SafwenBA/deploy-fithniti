@@ -1,0 +1,5 @@
+package com.team.fithniti.demo.util;
+
+public enum ReportedBy {
+    DRIVER,PASSENGER
+}
