@@ -1,24 +1,32 @@
 package com.team.fithniti.demo.service;
 
-import com.team.fithniti.demo.model.Passenger;
+import com.team.fithniti.demo.dto.request.NewRide;
+import com.team.fithniti.demo.dto.response.RideDTO;
+import com.team.fithniti.demo.dto.RideFilterOption;
 import com.team.fithniti.demo.model.Ride;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
+import java.util.Map;
 
+/**
+ * Start with Simple CRUD
+ */
 public interface RideService {
-    Ride create(Ride ride);
-    List<Ride> getAll();// Filter: Query DSL
-    List<Ride> getDriverRides(Long driverId);// Filter: Query DSL
 
+    RideDTO create(NewRide ride); // NewRide, included driverId + dataValidation
+    RideDTO findById(Long id);
+    Page<RideDTO> findAll(RideFilterOption options);// Filter: Query DSL
+    Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options);// Filter: Query DSL
     void deleteById(Long rideId);
-    void update(Long rideId);// update : state ...
-//    void rate(PassengerReview);
+    void update(Long rideId,Long driverId, Map<String,Object> changes);// update : state ...
 
-//    Request Service
-    void joinRide(Long rideID, Long passengerID);
-    void acceptRequest(Long rideID);
-    void rejectRequest(Long rideID);
-    void cancelRequest(Long rideID, Long passengerID);
+//    void rate(PassengerReview); ? may be in another service
 
+//    Request Service ---> into new Service
+//    void joinRide(Long rideID, Long passengerID);
+//    void acceptRequest(Long rideID);
+//    void rejectRequest(Long rideID);
+//    void cancelRequest(Long rideID, Long passengerID);
+//
 
 }
