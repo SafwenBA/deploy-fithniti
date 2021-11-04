@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.service.impl;
 
+import com.team.fithniti.demo.dto.response.RideDTO;
 import com.team.fithniti.demo.model.Driver;
 import com.team.fithniti.demo.model.Passenger;
 import com.team.fithniti.demo.model.PassengerReview;
@@ -30,13 +31,14 @@ public class DriverServiceImpl implements DriverService {
     public Page<Ride> getMyPools(Long driverId, Pageable pageable) {
         boolean present = driverRepo.findById(driverId).isPresent();
         if(present){
-            return (Page<Ride>) driverRepo.findById(driverId).get().getRides();
+            return (Page<Ride>) driverRepo.findById(driverId).get().getRides().stream().map(ride -> RideDTO.fromEntity(ride));
         }else{
             //TODO: Fix Exception
             throw new IllegalStateException("Driver not found");
         }
     }
 
+    //TODO : change with DTO
     @Override
     public PassengerReview createReview(PassengerReview passengerReview, Long passengerId) {
         //Assigning the review to the concurrent passenger

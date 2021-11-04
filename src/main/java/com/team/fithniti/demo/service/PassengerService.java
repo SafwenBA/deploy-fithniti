@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.service;
 
+import com.team.fithniti.demo.dto.response.RideDTO;
 import com.team.fithniti.demo.model.PassengerReview;
 import com.team.fithniti.demo.model.Ride;
 import com.team.fithniti.demo.model.RideRequest;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 public interface PassengerService {
     //Get subscribed pools for the passenger
-    Page<Ride> getSubscribedPools(UUID passengerId, Pageable pageable);
+    Page<RideDTO> getSubscribedPools(UUID passengerId, Pageable pageable);
 
     PassengerReview createReview(PassengerReview review, Long rideId);
 

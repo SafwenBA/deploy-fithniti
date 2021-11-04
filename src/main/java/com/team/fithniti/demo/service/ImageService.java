@@ -8,6 +8,7 @@ import java.util.UUID;
 public interface ImageService {
     Logo loadImage(UUID uuid);
     Logo loadDefault();
-    void storeImage(UUID uuid, MultipartFile file);
+    void storeImage(UUID userId, MultipartFile file);
     void deleteImage(UUID uuid);
+    void storeDefault(MultipartFile file);
 }

@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.service.impl;
 
+import com.team.fithniti.demo.dto.response.RideDTO;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.PassengerRepo;
@@ -25,12 +26,14 @@ public class PassengerServiceImpl implements PassengerService {
     private RideRepo rideRepo;
 
     @Override
-    public Page<Ride> getSubscribedPools(UUID passengerId, Pageable pageable) {
-        return (Page<Ride>) passengerRepo.findAllById(passengerId, pageable).stream().map(
-                RideRequest::getRide
+    public Page<RideDTO> getSubscribedPools(UUID passengerId, Pageable pageable) {
+        return (Page<RideDTO>) passengerRepo.findAllById(passengerId, pageable).stream().map(
+                rideRequest -> RideDTO.fromEntity(rideRequest.getRide())
+                //RideRequest::getRide
         ).collect(Collectors.toList());
     }
 
+    //TODO : change with DTO
     @Override
     public PassengerReview createReview(PassengerReview passengerReview, Long rideId) {
         //Assigning the review to the concurrent driver

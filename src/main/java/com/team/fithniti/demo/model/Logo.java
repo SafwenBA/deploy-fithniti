@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.bson.types.Binary;
@@ -13,9 +14,11 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Document(collation = "logos")
+@Builder
+@Document(collection = "logos")
 public class Logo {
     @Id
+    private String id;
     @TextIndexed
     private UUID userId;
     private Binary image;
