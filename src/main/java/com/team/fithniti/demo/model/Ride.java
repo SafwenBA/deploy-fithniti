@@ -32,7 +32,13 @@ public class Ride extends Auditable{
     private Float price;
     private LocalTime startTime;
     private LocalTime arrivalTime;
-    //    no need for StartDate -- auto sysDate ---> stored fi createdDate
+
+    @OneToOne
+    private Car car;
+
+    @OneToOne
+    private CarModel carModel;
+
     // TODO: 10/30/21 chat group : similar to MS teams
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
