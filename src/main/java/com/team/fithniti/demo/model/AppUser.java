@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.joda.time.LocalDate;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -13,6 +12,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -32,7 +32,7 @@ public class AppUser extends Auditable{
     private String address;
     private LocalDate birthDate;
     private UserState state;
-    // TODO: 10/29/21 new table + extra fields
+    private String photoURL;
 
     @OneToOne
     @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name
