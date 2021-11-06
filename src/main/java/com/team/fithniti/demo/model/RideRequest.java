@@ -21,12 +21,13 @@ public class RideRequest extends Auditable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    Passenger passenger;
+    private RideRequestState state;
 
     @ManyToOne
-    Ride ride;
-    private RideRequestState state;
+    private Passenger passenger;
+
+    @ManyToOne
+    private Ride ride;
 
 
 }
