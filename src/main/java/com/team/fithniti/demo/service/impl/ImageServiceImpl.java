@@ -158,9 +158,7 @@ public class ImageServiceImpl implements ImageService {
             throw new IllegalStateException("Logo not found");
         }
     }
-
-
-
+    
     @Override
     public Image delete(UUID uuid) {
         Image image = getImage(uuid);
