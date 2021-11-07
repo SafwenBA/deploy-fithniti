@@ -34,4 +34,7 @@ public class Passenger {
     @OneToOne
     private AppUser user;
 
+    public Passenger(AppUser user) {
+        this.user = user;
+    }
 }
