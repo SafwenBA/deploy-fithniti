@@ -29,6 +29,7 @@ public class Driver {
     @OneToOne
     private AppUser user;
 
-
-
+    public Driver(AppUser user) {
+        this.user = user;
+    }
 }

@@ -13,6 +13,8 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class HelloWorldController implements HelloWorldAPI {
 
+
+
     @Override
     public Map<Object, Object> hello(){
         HashMap<Object, Object> map = new HashMap<>();
