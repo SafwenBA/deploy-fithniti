@@ -3,9 +3,9 @@ package com.team.fithniti.demo.service;
 import com.team.fithniti.demo.dto.request.NewRide;
 import com.team.fithniti.demo.dto.response.RideDTO;
 import com.team.fithniti.demo.dto.RideFilterOption;
-import com.team.fithniti.demo.model.Ride;
 import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -19,7 +19,6 @@ public interface RideService {
     Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options);// Filter: Query DSL
     void deleteById(Long rideId);
     void update(Long rideId,Long driverId, Map<String,Object> changes);// update : state ...
-
 //    void rate(PassengerReview); ? may be in another service
 
 //    Request Service ---> into new Service
