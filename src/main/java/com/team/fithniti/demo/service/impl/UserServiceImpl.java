@@ -56,9 +56,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
-        Optional<AppUser> user = userRepo.findByPhoneNumber(phoneNumber) ;
-        if ( user.isEmpty() ) throw new UsernameNotFoundException("phoneNumber was not found ! ");
-        AppUser userData = user.get()  ;
+        AppUser userData = findByPhoneNumber(phoneNumber);
         return new User(userData.getUsername(),userData.getPassword(),userData.getAuthorities());
     }
 
@@ -69,11 +67,8 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UUID getIdByUsername(String phoneNumber) {
-        Optional<AppUser> user = userRepo.findByPhoneNumber(phoneNumber) ;
-        if (user.isEmpty()) throw new ResourceNotFound("Wrong phoneNumber !");
-        return user.get().getId() ;
+      return findByPhoneNumber(phoneNumber).getId();
     }
-
 
     @Override
     public RegistrationSuccessful create(NewUser user) {
@@ -116,7 +111,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public VerificationResponse verifyAccount(UUID user_id , String verificationCode) {
         Optional<UserRegistrationRequest> registrationRequest = userRegistrationRequestRepo.findByUserId(user_id) ;
-        if (registrationRequest.isEmpty()) throw new ResourceNotFound("Request was not found !") ;
+        if ( ! registrationRequest.isPresent()) throw new ResourceNotFound("USER_NOT_FOUND","Request was not found !") ;
         UserRegistrationRequest request = registrationRequest.get() ;
         // user has entered the correct verification code
         if (Objects.equals(request.getVerificationCode(), verificationCode)) {
@@ -163,18 +158,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
         }
     }
-
+    private AppUser findByPhoneNumber(String phoneNumber){
+        return userRepo.findByPhoneNumber(phoneNumber).orElseThrow(
+                () -> new ResourceNotFound("USER_NOT_FOUND","Wrong phoneNumber !"));
+    }
     //todo - this one is dump ngl , a rework is needed probably
     @Override
     public RecoveryResponse passwordRecovery(String phoneNumber) {
         if (!UserValidation.validatePhoneNumber(phoneNumber))
-            throw new InvalidResource(List.of("Invalid Phone Number "),
+            throw new InvalidResource(Arrays.asList("Invalid Phone Number "),
                     "400",
                     "entered phone " +
                             "number does not correspond to a correct phone number format !") ;
         Optional<AppUser> appUser = userRepo.findByPhoneNumber(phoneNumber) ;
-        if (appUser.isEmpty()) throw new ResourceNotFound("User with associated phone number " +
-                "could not be found ,please try another number ! ") ;
+        if (! appUser.isPresent()) throw new ResourceNotFound("USER_NOT_FOUND","User with associated phone number could not be found ,please try another number ! ") ;
         // we send the password to the user with the verified number
         int temporaryPassword = new Random().nextInt(9999999 - 1111111 + 1) + 1111111 ;
         appUser.get().setPassword(new BCryptPasswordEncoder().encode(Integer.toString(temporaryPassword)));
@@ -193,9 +190,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public RoleChange changeRole(UUID user_id , Integer role_id) {
         Optional<AppUser> appUser = userRepo.findById(user_id) ;
-        if (appUser.isEmpty()) throw new ResourceNotFound("user was not found !") ;
+        if ( ! appUser.isPresent()) throw new ResourceNotFound("USER_NOT_FOUND","user was not found !") ;
         Optional<Role> role = roleRepo.findById(role_id) ;
-        if (role.isEmpty()) throw new ResourceNotFound("role was not found !") ;
+        if ( !role.isPresent()) throw new ResourceNotFound("ROLE_NOT_FOUND","role was not found !") ;
         appUser.get().setRole(role.get());
         return RoleChange.builder()
                 .status("ROLE_CHANGED")
