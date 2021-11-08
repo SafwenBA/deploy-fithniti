@@ -17,5 +17,5 @@ public class CarModel extends Auditable{
     private Long id;
     private String model;
     @ManyToOne
-    private Car car ;
+    private Car car;
 }

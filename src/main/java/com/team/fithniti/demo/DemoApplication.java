@@ -18,11 +18,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @SpringBootApplication
 @EnableJpaAuditing
 public class DemoApplication implements CommandLineRunner {
-    @Autowired
-    private RoleRepo roleRepo;
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
     }
+
+    @Autowired
+    private RoleRepo roleRepo;
+
     @Autowired
     private RideRepo rideRepo;
 
@@ -41,7 +43,7 @@ public class DemoApplication implements CommandLineRunner {
     public void run(String... args) throws Exception {
         Role user = new Role(1, "USER");
         Role admin = new Role(2, "ADMIN");
-        Role superadmin = new Role(3, "SUPER_ADMIN");
+        Role superAdmin = new Role(3, "SUPER_ADMIN");
 
         if (!roleRepo.existsById(1)){
             roleRepo.save(user);
@@ -50,7 +52,7 @@ public class DemoApplication implements CommandLineRunner {
             roleRepo.save(admin);
         }
         if (!roleRepo.existsById(3)){
-            roleRepo.save(superadmin);
+            roleRepo.save(superAdmin);
         }
 
     }
