@@ -4,28 +4,14 @@ import com.team.fithniti.demo.dto.request.NewRide;
 import com.team.fithniti.demo.dto.response.RideDTO;
 import com.team.fithniti.demo.dto.RideFilterOption;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 import java.util.Map;
 
-/**
- * Start with Simple CRUD
- */
 public interface RideService {
 
-    RideDTO create(NewRide ride); // NewRide, included driverId + dataValidation
+    RideDTO create(NewRide ride);
     RideDTO findById(Long id);
     Page<RideDTO> findAll(RideFilterOption options);// Filter: Query DSL
     Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options);// Filter: Query DSL
     void deleteById(Long rideId);
     void update(Long rideId,Long driverId, Map<String,Object> changes);// update : state ...
-//    void rate(PassengerReview); ? may be in another service
-
-//    Request Service ---> into new Service
-//    void joinRide(Long rideID, Long passengerID);
-//    void acceptRequest(Long rideID);
-//    void rejectRequest(Long rideID);
-//    void cancelRequest(Long rideID, Long passengerID);
-//
-
 }
