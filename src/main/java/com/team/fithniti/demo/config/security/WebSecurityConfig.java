@@ -1,9 +1,11 @@
 package com.team.fithniti.demo.config.security;
 import com.team.fithniti.demo.service.UserService;
+import com.team.fithniti.demo.service.impl.MyUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -21,37 +23,38 @@ import static org.springframework.http.HttpMethod.POST;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserDetailsService userDetailsService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder ;
-    private final UserService appUserService ;
 
     @Autowired
-    public WebSecurityConfig(UserDetailsService userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder, UserService appUserService) {
-        this.userDetailsService = userDetailsService;
+    UnauthorizedEntryPoint unauthorizedEntryPoint;
+
+    @Autowired
+    JwtAuthenticationFilter jwtAuthenticationFilter;
+
+    @Autowired
+    MyUserDetailsService myUserDetailsService;
+
+    @Autowired
+    public WebSecurityConfig(BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.appUserService = appUserService;
+
     }
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder) ;
+        auth.authenticationProvider(daoAuthenticationProvider());
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        /*http.cors().and().csrf().disable()
-                .authorizeRequests()
-                .antMatchers("/**").permitAll()
+        http.csrf().disable()
+                .authorizeRequests().antMatchers("/auth/**")
+                .permitAll()
                 .anyRequest().authenticated()
-                .and()
-                //.exceptionHandling().authenticationEntryPoint(UnauthorizedEntryPoint).and()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); */
-        http.csrf().disable() ;
-        http.sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS) ;
-        http.authorizeRequests().antMatchers(POST,"/login").permitAll() ;
-        http.addFilter(new JwtAuthenticationFilter(authenticationManagerBean(), appUserService)) ;
-        http.addFilterBefore(new UnauthorizedEntryPoint(), UsernamePasswordAuthenticationFilter.class) ;
+                .and().sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.addFilterBefore(unauthorizedEntryPoint, UsernamePasswordAuthenticationFilter.class);
+
 
     }
 
@@ -64,6 +67,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 "/configuration/security",
                 "/swagger-ui.html",
                 "/webjars/**");
+    }
+    //added
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider(){
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setPasswordEncoder(bCryptPasswordEncoder);
+        provider.setUserDetailsService(myUserDetailsService);
+        return provider;
     }
 
     @Bean

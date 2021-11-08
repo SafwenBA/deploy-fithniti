@@ -4,7 +4,9 @@ import com.team.fithniti.demo.dto.NewUser;
 import com.team.fithniti.demo.dto.RecoveryResponse;
 import com.team.fithniti.demo.dto.RegistrationSuccessful;
 import com.team.fithniti.demo.dto.VerificationResponse;
+import com.team.fithniti.demo.dto.response.AuthenticationResponse;
 import com.team.fithniti.demo.model.AppUser;
+import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -14,6 +16,7 @@ import java.util.UUID;
 public interface AuthAPI {
 
     RegistrationSuccessful create(NewUser user) ;
+    ResponseEntity<?> login(String phoneNumber, String password) throws Exception;
     RecoveryResponse passwordRecovery(String phoneNumber) ;
     VerificationResponse verifyAccount(UUID user_id, String verificationCode) ;
     void refreshToken(HttpServletRequest request , HttpServletResponse response) throws IOException;

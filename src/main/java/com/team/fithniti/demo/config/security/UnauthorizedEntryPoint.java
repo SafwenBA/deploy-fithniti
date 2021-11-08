@@ -29,13 +29,14 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+@Component
 public class UnauthorizedEntryPoint extends OncePerRequestFilter {
 
     private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,  FilterChain filterChain) throws ServletException, IOException {
-        if (request.getServletPath().equals("/login") ) {
+        if (request.getServletPath().contains("/login") ) {
             filterChain.doFilter(request, response);
             System.out.println("LOGIN ENDPOINT SKIPPED ..... !") ;
         } else {

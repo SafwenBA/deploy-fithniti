@@ -25,7 +25,7 @@ public class NewUser {
     private String address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     @Temporal(TemporalType.DATE)
-    private Date birthDate;
+    private LocalDate birthDate;
     private String encodedLogo ;
 
 

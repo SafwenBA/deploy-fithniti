@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.team.fithniti.demo.util.AppUserRole;
 import com.team.fithniti.demo.util.UserState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -30,11 +32,11 @@ public class AppUser extends Auditable implements UserDetails {
     private String lastName;
     private String address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Temporal(TemporalType.DATE)
-    private Date birthDate;
+    private LocalDate birthDate;
     private UserState state;
     private String encodedLogo ;
     private boolean confirmed ;
+    private String photoUrl;
 
     @OneToOne
     @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name
@@ -43,35 +45,43 @@ public class AppUser extends Auditable implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<SimpleGrantedAuthority> authories = new ArrayList<>() ;
-        authories.add(new SimpleGrantedAuthority(role.getName())) ;
-        return authories;
+        //Collection<SimpleGrantedAuthority> authories = new ArrayList<>() ;
+        //authories.add(new SimpleGrantedAuthority(role.getName())) ;
+        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(AppUserRole.USER.name());
+        return Collections.singletonList(simpleGrantedAuthority);
+
+        //return authories;
     }
 
 
     @Override
     public String getUsername() {
-        return getPhoneNumber();
+        return phoneNumber;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return confirmed ;
+        return true ;
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return state==UserState.ACTIVE;
+        return true;
     }
 
 }
