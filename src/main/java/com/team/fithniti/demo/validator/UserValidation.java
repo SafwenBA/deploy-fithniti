@@ -1,10 +1,8 @@
 package com.team.fithniti.demo.validator;
 
-import com.team.fithniti.demo.dto.NewUser;
-import com.team.fithniti.demo.model.AppUser;
+import com.team.fithniti.demo.dto.request.NewUser;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class UserValidation {

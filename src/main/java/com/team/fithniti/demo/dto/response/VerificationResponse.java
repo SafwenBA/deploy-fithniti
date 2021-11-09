@@ -1,4 +1,4 @@
-package com.team.fithniti.demo.dto;
+package com.team.fithniti.demo.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class RecoveryResponse {
-    private String status ;
+public class VerificationResponse {
+    private String verificationState ;
     private String message ;
 }

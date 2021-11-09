@@ -1,6 +1,10 @@
 package com.team.fithniti.demo.service;
 
-import com.team.fithniti.demo.dto.*;
+import com.team.fithniti.demo.dto.request.NewUser;
+import com.team.fithniti.demo.dto.response.RecoveryResponse;
+import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
+import com.team.fithniti.demo.dto.response.RoleChange;
+import com.team.fithniti.demo.dto.response.VerificationResponse;
 import com.team.fithniti.demo.model.AppUser;
 
 import javax.servlet.http.HttpServletRequest;

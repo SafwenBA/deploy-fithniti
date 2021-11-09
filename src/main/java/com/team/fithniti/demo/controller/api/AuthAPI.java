@@ -1,10 +1,9 @@
 package com.team.fithniti.demo.controller.api;
 
-import com.team.fithniti.demo.dto.NewUser;
-import com.team.fithniti.demo.dto.RecoveryResponse;
-import com.team.fithniti.demo.dto.RegistrationSuccessful;
-import com.team.fithniti.demo.dto.VerificationResponse;
-import com.team.fithniti.demo.model.AppUser;
+import com.team.fithniti.demo.dto.request.NewUser;
+import com.team.fithniti.demo.dto.response.RecoveryResponse;
+import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
+import com.team.fithniti.demo.dto.response.VerificationResponse;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

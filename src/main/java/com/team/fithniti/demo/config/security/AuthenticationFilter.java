@@ -26,14 +26,13 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager ;
     private final UserService appUserService ;
     private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
     // injected via the constructor
-    @Autowired
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, UserService appUserService) {
+    public AuthenticationFilter(AuthenticationManager authenticationManager, UserService appUserService) {
         this.authenticationManager = authenticationManager;
         this.appUserService = appUserService;
     }
