@@ -69,7 +69,7 @@ public class RideServiceImpl implements RideService{
     @Override
     public RideDTO findById(Long id) {
         return RideDTO.fromEntity(rideRepo.findById(id).orElseThrow(
-                () -> new ResourceNotFound("No Ride found")));
+                () -> new ResourceNotFound("INVALID_RIDE","No Ride found")));
     }
 
     @Override
