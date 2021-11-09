@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 @Data
 @AllArgsConstructor
@@ -23,8 +22,8 @@ public class UserDTO {
 
     private String phoneNumber;
     private String address;
-    private Date birthDate;
-    private String encodedLogo;
+    private LocalDate birthDate;
+    private String photoURL;
 
     private DriverDto driver;
     private PassengerDto passenger;
@@ -40,7 +39,7 @@ public class UserDTO {
                 .birthDate(user.getBirthDate())
                 .phoneNumber(user.getPhoneNumber()) //add field to show/hide private data like address or phone
                 .state(user.getState())
-                .encodedLogo(user.getEncodedLogo())
+                .photoURL(user.getPhotoUrl())
                 .driver(driver)
                 .passenger(passenger)
                 .build();

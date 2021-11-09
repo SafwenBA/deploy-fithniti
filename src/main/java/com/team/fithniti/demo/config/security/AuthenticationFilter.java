@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -26,16 +27,16 @@ import java.util.stream.Collectors;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-    private final AuthenticationManager authenticationManager ;
-    private final UserService appUserService ;
+@Component
+public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+    @Autowired
+    private AuthenticationManager authenticationManager ;
+
+    @Autowired
+    private UserService appUserService ;
+
     private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
-    // injected via the constructor
-    public AuthenticationFilter(AuthenticationManager authenticationManager, UserService appUserService) {
-        this.authenticationManager = authenticationManager;
-        this.appUserService = appUserService;
-    }
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -44,6 +45,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
         UsernamePasswordAuthenticationToken authenticationToken =
                 new UsernamePasswordAuthenticationToken(phoneNumber,password) ;
         return authenticationManager.authenticate(authenticationToken) ;
+    }
+
+    @Override
+    @Autowired
+    public void setAuthenticationManager(AuthenticationManager authenticationManager) {
+        super.setAuthenticationManager(authenticationManager);
     }
 
     @Override

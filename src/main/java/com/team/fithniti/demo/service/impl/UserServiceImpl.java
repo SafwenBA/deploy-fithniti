@@ -45,7 +45,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Service
 @AllArgsConstructor
 @Transactional
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
@@ -58,13 +58,13 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
 
-    @Override
-    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
-        Optional<AppUser> user = userRepo.findByPhoneNumber(phoneNumber) ;
-        if ( user.isEmpty() ) throw new UsernameNotFoundException("phoneNumber was not found ! ");
-        AppUser userData = user.get()  ;
-        return new User(userData.getUsername(),userData.getPassword(),userData.getAuthorities());
-    }
+//    @Override
+//    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
+//        Optional<AppUser> user = userRepo.findByPhoneNumber(phoneNumber) ;
+//        if ( user.isEmpty() ) throw new UsernameNotFoundException("phoneNumber was not found ! ");
+//        AppUser userData = user.get()  ;
+//        return new User(userData.getUsername(),userData.getPassword(),userData.getAuthorities());
+//    }
 
     @Override
     public List<AppUser> getAll() {
@@ -109,11 +109,11 @@ public class UserServiceImpl implements UserService, UserDetailsService {
                 .build() ;
         userRegistrationRequestRepo.save(request) ;
         // send sms with twilio
-        twilioService.sendSms(SmsRequest.builder()
-                        .phoneNumber(appUser.getPhoneNumber())
-                        .message("Your <fiThniti> Account Verification Code is "
-                                +request.getVerificationCode())
-                .build());
+//        twilioService.sendSms(SmsRequest.builder()
+//                        .phoneNumber(appUser.getPhoneNumber())
+//                        .message("Your <fiThniti> Account Verification Code is "
+//                                +request.getVerificationCode())
+//                .build());
         return new RegistrationSuccessful(appUser);
     }
 

@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.controller;
 
 import com.team.fithniti.demo.controller.api.ImageApi;
+import com.team.fithniti.demo.model.Image;
 import com.team.fithniti.demo.model.Logo;
 import com.team.fithniti.demo.service.ImageService;
 import com.team.fithniti.demo.service.impl.ImageServiceImpl;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.awt.*;
+import java.io.File;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -21,27 +23,30 @@ public class ImageController implements ImageApi {
     private ImageService imageService;
 
     @Override
-    public Logo getByUserId(UUID userId) {
-        return imageService.loadImage(userId);
+    public Image getByUserId(UUID userId) {
+        //return imageService.loadImage(userId);
+        return imageService.getImage(userId);
     }
 
     @Override
-    public void save(UUID userId, MultipartFile file) {
-        imageService.storeImage(userId, file);
+    public Image save(UUID userId, MultipartFile file) {
+        //imageService.storeImage(userId, file);
+         return (Image) imageService.addImage(userId, file);
     }
 
     @Override
-    public Logo getDefault() {
-       return imageService.loadDefault();
+    public Image getDefault() {
+       //return imageService.loadDefault();
+        return imageService.getDefault();
     }
 
     @Override
-    public void delete(UUID userId) {
-        imageService.deleteImage(userId);
+    public Image delete(UUID userId) {
+        return imageService.delete(userId);
     }
 
     @Override
     public void saveDefault(MultipartFile file) {
-        imageService.storeDefault(file);
+        imageService.addDefault(file);
     }
 }
