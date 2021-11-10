@@ -209,6 +209,9 @@ public class UserServiceImpl implements UserService {
         Optional<AppUser> appUser = userRepo.findByPhoneNumber(recoveryRequest.getPhoneNumber()) ;
         if (appUser.isEmpty()) throw new ResourceNotFound("NOT-FOUND","User with associated phone number " +
                 "could not be found ,please try another number ! ") ;
+        // if an ancient recovery requests exists => delete that mf
+        Optional<UserRecoveryRequest> exists = userRecoveryRequestRepo.findByUser(appUser.get()) ;
+        exists.ifPresent(userRecoveryRequestRepo::delete);
         // we send the password to the user with the verified number
         String recoveryCode = String.valueOf(new Random().nextInt(9999999 - 1111111 + 1) + 1111111) ;
         UserRecoveryRequest request  = UserRecoveryRequest
