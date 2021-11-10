@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.service;
 
+
 import com.team.fithniti.demo.model.Image;
 import com.team.fithniti.demo.model.Logo;
 import org.apache.commons.io.FileUtils;
@@ -30,6 +31,7 @@ public interface ImageService {
     void addDefault(MultipartFile file);
     Image delete(UUID uuid);
 
+    //todo - come back to this one and remove the comments
     default String toBase64(File file) throws IOException {
         byte[] fileContent = FileUtils.readFileToByteArray((File) file);
         String encodedString = Base64.getEncoder().encodeToString(fileContent);

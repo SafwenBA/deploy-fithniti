@@ -3,6 +3,7 @@ package com.team.fithniti.demo.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.team.fithniti.demo.util.AppUserRole;
 import com.team.fithniti.demo.util.UserState;
+import com.team.fithniti.demo.util.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,8 +36,9 @@ public class AppUser extends Auditable implements UserDetails {
     private LocalDate birthDate;
     private UserState state;
     private String encodedLogo ;
-    private boolean confirmed ;
+    private boolean confirmed  ;
     private String photoUrl;
+    private UserType lastConnectedAs ;
 
     @OneToOne
     @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name
@@ -45,12 +47,8 @@ public class AppUser extends Auditable implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        //Collection<SimpleGrantedAuthority> authories = new ArrayList<>() ;
-        //authories.add(new SimpleGrantedAuthority(role.getName())) ;
         SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(AppUserRole.USER.name());
         return Collections.singletonList(simpleGrantedAuthority);
-
-        //return authories;
     }
 
 

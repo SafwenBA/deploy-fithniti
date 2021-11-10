@@ -1,10 +1,7 @@
 package com.team.fithniti.demo.service;
 
-import com.team.fithniti.demo.dto.request.NewUser;
-import com.team.fithniti.demo.dto.response.RecoveryResponse;
-import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
-import com.team.fithniti.demo.dto.response.RoleChange;
-import com.team.fithniti.demo.dto.response.VerificationResponse;
+import com.team.fithniti.demo.dto.request.*;
+import com.team.fithniti.demo.dto.response.*;
 import com.team.fithniti.demo.model.AppUser;
 
 import javax.servlet.http.HttpServletRequest;
@@ -15,9 +12,12 @@ import java.util.UUID;
 
 public interface UserService {
     List<AppUser> getAll();
+    AuthenticationResponse login(AuthenticationRequest request) ;
     RegistrationSuccessful create(NewUser user);
-    RecoveryResponse passwordRecovery(String phoneNumber) ;
     VerificationResponse verifyAccount(UUID user_id , String verificationCode) ;
+    RecoveryResponse requestPasswordRecovery(RecoveryRequest recoveryRequest);
+    RecoveryResponse validateRecoveryCode(RecoveryValidationRequest validationRequest);
+    RecoveryResponse updateForgottenPassword(UpdatePasswordRequest updateRequest);
     RoleChange changeRole(UUID user_id , Integer role_id) ;
     void refreshToken(HttpServletRequest request , HttpServletResponse response) throws IOException;
     UUID getIdByUsername(String phoneNumber) ;
