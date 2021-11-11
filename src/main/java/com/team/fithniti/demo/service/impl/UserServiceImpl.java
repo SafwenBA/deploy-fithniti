@@ -122,15 +122,18 @@ public class UserServiceImpl implements UserService {
         if(appUser.getEncodedLogo() == null || appUser.getEncodedLogo().equals("")){
             // set default logo
             //todo - uncomment this when image service is active
-            appUser.setEncodedLogo(imageService.getDefaultBase64());
+            //appUser.setEncodedLogo(imageService.getDefaultBase64());
+            appUser.setEncodedLogo("");
         }
+        // assign the default user role to all new users
+        Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
+        userRole.ifPresent(appUser::setRole);
+
         userRepo.save(appUser) ;
         // we assign a driver and a passenger objects relative to our AppUser object
         driverRepo.save(Driver.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
         passengerRepo.save(Passenger.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
-        // assign the default user role to all new users
-        Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
-        userRole.ifPresent(appUser::setRole);
+
         // we assign the registration code to the user
         UserRegistrationRequest request = UserRegistrationRequest.builder()
                 .user(appUser)
