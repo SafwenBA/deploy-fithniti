@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.dto.response;
 
+import com.team.fithniti.demo.util.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -16,5 +17,6 @@ public class ValidAuthentication extends AuthenticationResponse{
     private  String refreshToken ;
     private  String encodedLogo ;
     private Date tokenExpirationDate ;
+    private UserType lastConnectedAs ;
 
 }
