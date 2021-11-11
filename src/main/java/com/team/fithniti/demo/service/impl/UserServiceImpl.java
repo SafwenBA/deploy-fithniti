@@ -62,12 +62,12 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final AuthenticationManager authenticationManager;
 
-
     @Override
     public List<AppUser> getAll() {
         return userRepo.findAll();
     }
 
+    //todo - check user state {BAN or PERMA_BAN}
     @Override
     public AuthenticationResponse login(AuthenticationRequest request ) {
         try{
@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
         AppUser appuser = userRepo.findByPhoneNumber(userDetails.getUsername()).get() ;
         // if the user account is not confirmed
         if (!appuser.isConfirmed())
-            return  new InvalidAuthentication("NOT_CONFIRMED","Please Confirm Your Account ! ")  ;
+            return  new UnconfirmedAuthentication("NOT_CONFIRMED",appuser.getId(),"Please Confirm Your Account ! ")  ;
         UUID userId = appuser.getId();
         String userLogo = appuser.getEncodedLogo();
         Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8)) ;
@@ -94,9 +94,7 @@ public class UserServiceImpl implements UserService {
                 .withSubject(userDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
-        return new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate);
-
-
+        return new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate,appuser.getLastConnectedAs());
     }
 
     @Override
@@ -123,12 +121,10 @@ public class UserServiceImpl implements UserService {
             // set default logo
             //todo - uncomment this when image service is active
             //appUser.setEncodedLogo(imageService.getDefaultBase64());
-            appUser.setEncodedLogo("");
         }
         // assign the default user role to all new users
         Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
         userRole.ifPresent(appUser::setRole);
-
         userRepo.save(appUser) ;
         // we assign a driver and a passenger objects relative to our AppUser object
         driverRepo.save(Driver.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
@@ -242,7 +238,7 @@ public class UserServiceImpl implements UserService {
         if (Objects.equals(request.get().getUser().getPhoneNumber(), validationRequest.getPhoneNumber()))
             return RecoveryResponse.builder()
                     .status("VALIDATED")
-                    .message("recover code is valid for phone number "+validationRequest.getPhoneNumber())
+                    .message("Recovery code is valid for phone number "+validationRequest.getPhoneNumber())
                     .build();
         else {
             return RecoveryResponse.builder()

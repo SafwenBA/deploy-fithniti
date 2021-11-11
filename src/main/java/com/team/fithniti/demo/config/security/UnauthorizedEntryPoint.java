@@ -6,6 +6,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.team.fithniti.demo.util.Constants;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,19 +33,17 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @Component
 public class UnauthorizedEntryPoint extends OncePerRequestFilter {
 
-    private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,HttpServletResponse response,  FilterChain filterChain) throws ServletException, IOException {
         if (request.getServletPath().contains("/login") ) {
             filterChain.doFilter(request, response);
-            System.out.println("LOGIN ENDPOINT SKIPPED ..... !") ;
         } else {
             String authorizationHeader = request.getHeader(AUTHORIZATION);
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
                 try {
                     String token = authorizationHeader.substring("Bearer ".length());
-                    Algorithm algorithm = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
+                    Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8));
                     JWTVerifier verifier = JWT.require(algorithm).build();
                     DecodedJWT decodedJWT = verifier.verify(token);
                     String username = decodedJWT.getSubject();
