@@ -21,6 +21,9 @@ public class UserValidation {
 
     public static boolean validatePhoneNumber(String phoneNumber){
         return phoneNumber.matches("\\+216[0-9]{8}") ;
+    }
 
+    public static boolean validatePassword(String password){
+        return (password.length() < 5) ;
     }
 }

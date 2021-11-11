@@ -32,13 +32,6 @@ public class AuthController implements AuthAPI {
     }
 
 
-
-    @Override
-    @PostMapping("/recovery")
-    public RecoveryResponse requestPasswordRecovery(@RequestBody RecoveryRequest request) {
-        return userService.requestPasswordRecovery(request) ;
-    }
-
     @Override
     @PostMapping("/verify")
     public VerificationResponse verifyAccount(@RequestParam UUID user_id, @RequestParam String verificationCode) {
@@ -59,14 +52,27 @@ public class AuthController implements AuthAPI {
     }
 
     @Override
-    @PostMapping("/recovery/validate")
+    @GetMapping("/recovery")
+    public RecoveryResponse requestPasswordRecovery(@RequestBody RecoveryRequest request) {
+        return userService.requestPasswordRecovery(request) ;
+    }
+
+
+    @Override
+    @PostMapping("/recovery")
     public RecoveryResponse validateRecoveryCode(@RequestBody RecoveryValidationRequest request) {
         return userService.validateRecoveryCode(request);
     }
 
     @Override
-    @PostMapping("/recovery/update")
+    @PutMapping("/recovery")
     public RecoveryResponse updateForgottenPassword(@RequestBody UpdatePasswordRequest request) {
         return userService.updateForgottenPassword(request);
+    }
+
+    @Override
+    @GetMapping("/recovery/resend")
+    public RecoveryResponse resendRecoveryPassword(@RequestBody RecoveryRequest request){
+        return userService.resendRecoveryPassword(request) ;
     }
 }

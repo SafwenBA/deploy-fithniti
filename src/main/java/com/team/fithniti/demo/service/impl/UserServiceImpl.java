@@ -16,6 +16,7 @@ import com.team.fithniti.demo.repository.*;
 import com.team.fithniti.demo.service.ImageService;
 import com.team.fithniti.demo.service.TwilioService;
 import com.team.fithniti.demo.service.UserService;
+import com.team.fithniti.demo.util.Constants;
 import com.team.fithniti.demo.util.RequestState;
 import com.team.fithniti.demo.util.UserState;
 import com.team.fithniti.demo.util.UserType;
@@ -56,9 +57,7 @@ public class UserServiceImpl implements UserService {
     private final TwilioService twilioService ;
     private final MyUserDetailsService myUserDetailsService;
     private final UserRecoveryRequestRepo userRecoveryRequestRepo ;
-    //todo - uncomment this after merge
     private final ImageService imageService ;
-    private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
     @Autowired
     private final AuthenticationManager authenticationManager;
@@ -74,19 +73,20 @@ public class UserServiceImpl implements UserService {
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getPhoneNumber(),request.getPassword()));
         } catch (BadCredentialsException e){
-            return new InvalidAuthentication("INVALID-CREDENTIALS","Incorrect Credentials ! ") ;
+            return new InvalidAuthentication("INVALID_CREDENTIALS","Incorrect Credentials ! ") ;
         }
         final UserDetails userDetails = myUserDetailsService.loadUserByUsername(request.getPhoneNumber());
         AppUser appuser = userRepo.findByPhoneNumber(userDetails.getUsername()).get() ;
         // if the user account is not confirmed
         if (!appuser.isConfirmed())
-            return  new InvalidAuthentication("NOT-CONFIRMED","Please Confirm Your Account ! ")  ;
+            return  new InvalidAuthentication("NOT_CONFIRMED","Please Confirm Your Account ! ")  ;
         UUID userId = appuser.getId();
         String userLogo = appuser.getEncodedLogo();
-        Algorithm algorithm = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8)) ;
+        Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8)) ;
+        Date expiryDate = new Date(System.currentTimeMillis()+ 10000*60*1000) ; // set this back to 10 mins lul , users will die before their token expires :v
         String access_token = JWT.create()
                 .withSubject(userDetails.getUsername())
-                .withExpiresAt(new Date(System.currentTimeMillis()+ 10000*60*1000)) // set this back to 10 mins lul , users will die before their token expires :v
+                .withExpiresAt(expiryDate)
                 .withClaim("role",userDetails.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList()))
                 .sign(algorithm) ;
 
@@ -94,7 +94,7 @@ public class UserServiceImpl implements UserService {
                 .withSubject(userDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
-        return new ValidAuthentication("LOGGED-IN",userId,access_token,refresh_token,userLogo);
+        return new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate);
 
 
     }
@@ -102,7 +102,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UUID getIdByUsername(String phoneNumber) {
         Optional<AppUser> user = userRepo.findByPhoneNumber(phoneNumber) ;
-        if (user.isEmpty()) throw new ResourceNotFound("NOT-FOUND","Wrong phoneNumber !");
+        if (user.isEmpty()) throw new ResourceNotFound("NOT_FOUND","Wrong phoneNumber !");
         return user.get().getId() ;
     }
 
@@ -119,10 +119,10 @@ public class UserServiceImpl implements UserService {
         appUser.setState(UserState.ACTIVE);
         appUser.setConfirmed(false);
         appUser.setLastConnectedAs(UserType.Passenger);
-        if (appUser.getEncodedLogo() == null || appUser.getEncodedLogo().equals("")){
+        if(appUser.getEncodedLogo() == null || appUser.getEncodedLogo().equals("")){
             // set default logo
             //todo - uncomment this when image service is active
-            //appUser.setEncodedLogo(imageService.getDefaultBase64());
+            appUser.setEncodedLogo(imageService.getDefaultBase64());
         }
         userRepo.save(appUser) ;
         // we assign a driver and a passenger objects relative to our AppUser object
@@ -151,7 +151,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public VerificationResponse verifyAccount(UUID user_id , String verificationCode) {
         Optional<UserRegistrationRequest> registrationRequest = userRegistrationRequestRepo.findByUserId(user_id) ;
-        if (registrationRequest.isEmpty()) throw new ResourceNotFound("NOT-FOUND","Request was not found !") ;
+        if (registrationRequest.isEmpty()) throw new ResourceNotFound("NOT_FOUND","Request was not found !") ;
         UserRegistrationRequest request = registrationRequest.get() ;
         // user has entered the correct verification code
         if (Objects.equals(request.getVerificationCode(), verificationCode)) {
@@ -223,10 +223,10 @@ public class UserServiceImpl implements UserService {
         twilioService.sendSms(SmsRequest.builder()
                 .phoneNumber(recoveryRequest.getPhoneNumber())
                 .message("Your <fiThniti> Recovery Code is "+ recoveryCode+
-                        ", you should change it when you log in !")
+                        ", enter it to confirm your account ! ")
                 .build());
         return RecoveryResponse.builder()
-                .status("RECOVERY-ISSUED")
+                .status("RECOVERY_ISSUED")
                 .message("Recovery Code  has been sent to account with number "+recoveryRequest.getPhoneNumber())
                 .build() ;
     }
@@ -243,8 +243,8 @@ public class UserServiceImpl implements UserService {
                     .build();
         else {
             return RecoveryResponse.builder()
-                    .status("NOT-VALIDATED")
-                    .message("Unvalid Recovery Code !")
+                    .status("NOT_VALIDATED")
+                    .message("Invalid Recovery Code !")
                     .build();
         }
     }
@@ -252,16 +252,42 @@ public class UserServiceImpl implements UserService {
     @Override
     public RecoveryResponse updateForgottenPassword(UpdatePasswordRequest updateRequest) {
         Optional<UserRecoveryRequest> request = userRecoveryRequestRepo.findByRecoveryCode(updateRequest.getRecoveryCode()) ;
-        if (request.isEmpty()) throw new ResourceNotFound("NOT-FOUND","No Recovery Request has " +
+        if (request.isEmpty()) throw new ResourceNotFound("NOT_FOUND","No Recovery Request has " +
                 "been found associated with the given code !") ;
         Optional<AppUser> appUser = userRepo.findByPhoneNumber(updateRequest.getPhoneNumber()) ;
-        if (appUser.isEmpty()) throw new ResourceNotFound("NOT-FOUND","No user was found who " +
+        if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","No user was found who " +
                 "has phone number = "+updateRequest.getPhoneNumber()) ;
+        if (!UserValidation.validatePassword(updateRequest.getNewPassword()))
+            throw new InvalidResource(List.of("Weak Password"),
+                    "400",
+                    "entered password is weak af , please change it !") ;
         appUser.get().setPassword(new BCryptPasswordEncoder().encode(updateRequest.getNewPassword()));
         userRecoveryRequestRepo.delete(request.get());
         return RecoveryResponse.builder()
-                .status("UPDATED-PASSWORD")
+                .status("UPDATED_PASSWORD")
                 .message("Password has been updated , you may log in again with the new password !")
+                .build();
+    }
+
+    @Override
+    public RecoveryResponse resendRecoveryPassword(RecoveryRequest request){
+        if (!UserValidation.validatePhoneNumber(request.getPhoneNumber()))
+            throw new InvalidResource(List.of("Invalid Phone Number "),
+                    "400",
+                    "entered phone " +
+                            "number does not correspond to a correct phone number format !") ;
+        Optional<AppUser> appUser = userRepo.findByPhoneNumber(request.getPhoneNumber()) ;
+        if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","could not find an account with given phone number !") ;
+        Optional<UserRecoveryRequest> recoveryRequest = userRecoveryRequestRepo.findByUser(appUser.get()) ;
+        if (recoveryRequest.isEmpty()) throw new ResourceNotFound("NOT_FOUND","No recovery " +
+                "request has been issued for the account associated with "+request.getPhoneNumber()) ;
+        twilioService.sendSms(SmsRequest.builder()
+                        .phoneNumber(request.getPhoneNumber())
+                        .message("Your <fiThniti> Recovery Code is "+recoveryRequest.get().getRecoveryCode())
+                .build());
+        return RecoveryResponse.builder()
+                .status("RECOVERY_RESEND")
+                .message("Recovery Code  has been resent to account with number "+request.getPhoneNumber())
                 .build();
     }
 
@@ -269,9 +295,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public RoleChange changeRole(UUID user_id , Integer role_id) {
         Optional<AppUser> appUser = userRepo.findById(user_id) ;
-        if (appUser.isEmpty()) throw new ResourceNotFound("NOT-FOUND","user was not found !") ;
+        if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","user was not found !") ;
         Optional<Role> role = roleRepo.findById(role_id) ;
-        if (role.isEmpty()) throw new ResourceNotFound("NOT-FOUND","role was not found !") ;
+        if (role.isEmpty()) throw new ResourceNotFound("NOT_FOUND","role was not found !") ;
         appUser.get().setRole(role.get());
         return RoleChange.builder()
                 .status("ROLE_CHANGED")
@@ -288,7 +314,7 @@ public class UserServiceImpl implements UserService {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             try {
                 String refresh_token = authorizationHeader.substring("Bearer ".length());
-                Algorithm algorithm = Algorithm.HMAC256(secret.getBytes(StandardCharsets.UTF_8));
+                Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8));
                 JWTVerifier verifier = JWT.require(algorithm).build();
                 DecodedJWT decodedJWT = verifier.verify(refresh_token);
                 String username = decodedJWT.getSubject();

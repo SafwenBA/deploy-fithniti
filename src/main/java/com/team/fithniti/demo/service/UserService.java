@@ -16,6 +16,7 @@ public interface UserService {
     RegistrationSuccessful create(NewUser user);
     VerificationResponse verifyAccount(UUID user_id , String verificationCode) ;
     RecoveryResponse requestPasswordRecovery(RecoveryRequest recoveryRequest);
+    RecoveryResponse resendRecoveryPassword(RecoveryRequest recoveryRequest) ;
     RecoveryResponse validateRecoveryCode(RecoveryValidationRequest validationRequest);
     RecoveryResponse updateForgottenPassword(UpdatePasswordRequest updateRequest);
     RoleChange changeRole(UUID user_id , Integer role_id) ;

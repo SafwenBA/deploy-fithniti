@@ -22,6 +22,7 @@ public interface AuthAPI {
     RecoveryResponse validateRecoveryCode( RecoveryValidationRequest request);
     VerificationResponse verifyAccount(UUID user_id, String verificationCode) ;
     RecoveryResponse updateForgottenPassword( UpdatePasswordRequest request);
+    RecoveryResponse resendRecoveryPassword(RecoveryRequest request) ;
 
     void refreshToken(HttpServletRequest request , HttpServletResponse response) throws IOException;
 

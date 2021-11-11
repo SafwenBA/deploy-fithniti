@@ -37,7 +37,7 @@ public class AppUser extends Auditable implements UserDetails {
     private UserState state;
     private String encodedLogo ;
     private boolean confirmed  ;
-    private String photoUrl;
+    private boolean enabled ;
     private UserType lastConnectedAs ;
 
     @OneToOne
