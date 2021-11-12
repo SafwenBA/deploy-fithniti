@@ -63,14 +63,8 @@ public class UserServiceImpl implements UserService {
     private final AuthenticationManager authenticationManager;
 
     @Override
-<<<<<<< HEAD
     public List<AppUser> getAll() {
         return userRepo.findAll();
-=======
-    public UserDetails loadUserByUsername(String phoneNumber) throws UsernameNotFoundException {
-        AppUser userData = findByPhoneNumber(phoneNumber);
-        return new User(userData.getUsername(),userData.getPassword(),userData.getAuthorities());
->>>>>>> origin/dev-hamdi
     }
 
     @Override
@@ -107,14 +101,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UUID getIdByUsername(String phoneNumber) {
-<<<<<<< HEAD
         Optional<AppUser> user = userRepo.findByPhoneNumber(phoneNumber) ;
         if (user.isEmpty()) throw new ResourceNotFound("NOT_FOUND","Wrong phoneNumber !");
         return user.get().getId() ;
-=======
-      return findByPhoneNumber(phoneNumber).getId();
->>>>>>> origin/dev-hamdi
     }
+
 
     @Override
     public RegistrationSuccessful create(NewUser user) {
@@ -161,11 +152,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public VerificationResponse verifyAccount(UUID user_id , String verificationCode) {
         Optional<UserRegistrationRequest> registrationRequest = userRegistrationRequestRepo.findByUserId(user_id) ;
-<<<<<<< HEAD
         if (registrationRequest.isEmpty()) throw new ResourceNotFound("NOT_FOUND","Request was not found !") ;
-=======
-        if ( ! registrationRequest.isPresent()) throw new ResourceNotFound("USER_NOT_FOUND","Request was not found !") ;
->>>>>>> origin/dev-hamdi
         UserRegistrationRequest request = registrationRequest.get() ;
         // user has entered the correct verification code
         if (Objects.equals(request.getVerificationCode(), verificationCode)) {
@@ -212,7 +199,6 @@ public class UserServiceImpl implements UserService {
 
         }
     }
-<<<<<<< HEAD
 
     @Override
     public RecoveryResponse requestPasswordRecovery(RecoveryRequest recoveryRequest) {
@@ -227,22 +213,6 @@ public class UserServiceImpl implements UserService {
         // if an ancient recovery requests exists => delete that mf
         Optional<UserRecoveryRequest> exists = userRecoveryRequestRepo.findByUser(appUser.get()) ;
         exists.ifPresent(userRecoveryRequestRepo::delete);
-=======
-    private AppUser findByPhoneNumber(String phoneNumber){
-        return userRepo.findByPhoneNumber(phoneNumber).orElseThrow(
-                () -> new ResourceNotFound("USER_NOT_FOUND","Wrong phoneNumber !"));
-    }
-    //todo - this one is dump ngl , a rework is needed probably
-    @Override
-    public RecoveryResponse passwordRecovery(String phoneNumber) {
-        if (!UserValidation.validatePhoneNumber(phoneNumber))
-            throw new InvalidResource(Arrays.asList("Invalid Phone Number "),
-                    "400",
-                    "entered phone " +
-                            "number does not correspond to a correct phone number format !") ;
-        Optional<AppUser> appUser = userRepo.findByPhoneNumber(phoneNumber) ;
-        if (! appUser.isPresent()) throw new ResourceNotFound("USER_NOT_FOUND","User with associated phone number could not be found ,please try another number ! ") ;
->>>>>>> origin/dev-hamdi
         // we send the password to the user with the verified number
         String recoveryCode = String.valueOf(new Random().nextInt(9999999 - 1111111 + 1) + 1111111) ;
         UserRecoveryRequest request  = UserRecoveryRequest
@@ -326,15 +296,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public RoleChange changeRole(UUID user_id , Integer role_id) {
         Optional<AppUser> appUser = userRepo.findById(user_id) ;
-<<<<<<< HEAD
         if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","user was not found !") ;
         Optional<Role> role = roleRepo.findById(role_id) ;
         if (role.isEmpty()) throw new ResourceNotFound("NOT_FOUND","role was not found !") ;
-=======
-        if ( ! appUser.isPresent()) throw new ResourceNotFound("USER_NOT_FOUND","user was not found !") ;
-        Optional<Role> role = roleRepo.findById(role_id) ;
-        if ( !role.isPresent()) throw new ResourceNotFound("ROLE_NOT_FOUND","role was not found !") ;
->>>>>>> origin/dev-hamdi
         appUser.get().setRole(role.get());
         return RoleChange.builder()
                 .status("ROLE_CHANGED")
