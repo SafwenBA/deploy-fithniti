@@ -25,4 +25,10 @@ public class CarModel extends Auditable{
     @ManyToOne
     @JoinColumn(name="car_id", referencedColumnName = "id")
     private Car car;
+
+    public CarModel(String model, String imageURL, Car car) {
+        this.model = model;
+        this.imageURL = imageURL;
+        this.car = car;
+    }
 }
