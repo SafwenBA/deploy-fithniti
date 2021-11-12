@@ -18,6 +18,12 @@ public class Car extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    public Car(String brand, String logoURL, List<CarModel> carModels) {
+        this.brand = brand;
+        this.logoURL = logoURL;
+        this.carModels = carModels;
+    }
+
     @Column(unique = true, nullable = false)
     private String brand;
 

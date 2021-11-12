@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.service.impl;
 
 import com.team.fithniti.demo.exception.InvalidResource;
+import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.Country;
 import com.team.fithniti.demo.repository.CountryRepo;
@@ -44,7 +45,7 @@ public class CountryServiceImpl implements CountryService {
             throw new InvalidResource(null, "INVALID_COUNTRY", "Can't persist null entity");
         }
         if(existsCountryByName(newCountry.getName())) {
-            throw new InvalidResource(null, "INVALID_COUNTRY", "Such country exists already");
+            throw new ResourceExists("EXIST", "This country name exists already");
         }
         return countryRepo.save(newCountry);
     }
@@ -53,7 +54,7 @@ public class CountryServiceImpl implements CountryService {
     public void updateCountry(Long id, Country updatedCountry) {
         Country countryData = getCountryById(id);
         if(existsCountryByName(updatedCountry.getName()) && updatedCountry.getFlagImageURL().equals(countryData.getFlagImageURL())) {
-            throw new InvalidResource(null, "INVALID_COUNTRY", "Such country exists already");
+            throw new ResourceExists("EXIST", "This country name exists already");
         }
         Country _country = countryData;
         _country.setName(updatedCountry.getName());

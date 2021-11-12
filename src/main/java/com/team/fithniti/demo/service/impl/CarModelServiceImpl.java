@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.service.impl;
 
 import com.team.fithniti.demo.exception.InvalidResource;
+import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.Car;
 import com.team.fithniti.demo.model.CarModel;
@@ -29,7 +30,7 @@ public class CarModelServiceImpl implements CarModelService {
             throw new ResourceNotFound("INVALID_CAR", "There is no such car brand");
         }
         if (existsCarModelByCarBrandAndModel(brand, newCarModel.getModel())) {
-            throw new InvalidResource(null, "INVALID_CAR_MODEL", "This car model exists already");
+            throw new ResourceExists("EXIST", "This car model name exists already");
         }
         Car car = carService.getCarByBrand(brand);
         newCarModel.setCar(car);
@@ -52,7 +53,7 @@ public class CarModelServiceImpl implements CarModelService {
         }
         CarModel _carModel = getCarModel(carModelId, brand);
         if (existsCarModelByCarBrandAndModel(brand, updatedCarModel.getModel()) && updatedCarModel.getImageURL().equals(_carModel.getImageURL())) {
-            throw new InvalidResource(null, "INVALID_CAR_MODEL", "This car model exists already");
+            throw new ResourceExists("EXIST", "This car model name exists already");
         }
 
         _carModel.setModel(updatedCarModel.getModel());

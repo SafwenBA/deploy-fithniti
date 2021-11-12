@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.service.impl;
 
 import com.team.fithniti.demo.exception.InvalidResource;
+import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.Country;
 import com.team.fithniti.demo.model.CountryState;
@@ -60,7 +61,7 @@ public class CountryStateServiceImpl implements CountryStateService {
             throw new ResourceNotFound("INVALID_COUNTRY", "This country doesn't exist");
         }
         if(existsCountryStateByCountryNameAndCountryStateName(countryName, countryState.getName())) {
-            throw new InvalidResource(null, "INVALID_COUNTRY_STATE", "This country state already exist");
+            throw new ResourceExists("EXIST", "This country state name exists already");
         }
         Country country = countryService.getCountryByName(countryName);
         countryState.setCountry(country);

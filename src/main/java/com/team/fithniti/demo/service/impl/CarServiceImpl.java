@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.service.impl;
 
 import com.team.fithniti.demo.exception.InvalidResource;
+import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.Car;
 import com.team.fithniti.demo.repository.CarRepo;
@@ -56,7 +57,7 @@ public class CarServiceImpl implements CarService {
             throw new InvalidResource(null, "INVALID_CAR", "Can't persist null entity");
         }
         if (existsCarByBrand(newCar.getBrand())) {
-            throw new InvalidResource(null, "INVALID_CAR", "Such car brand exists already");
+            throw new ResourceExists("EXIST", "This car brand exists already");
         }
         return carRepo.save(newCar);
     }
@@ -68,7 +69,7 @@ public class CarServiceImpl implements CarService {
         );
         Car _car = carData;
         if (existsCarByBrand(updatedCar.getBrand()) && updatedCar.getLogoURL().equals(_car.getLogoURL())) {
-            throw new InvalidResource(null, "INVALID_CAR", "Such car brand exists already");
+            throw new ResourceExists("EXIST", "This car brand exists already");
         }
         _car.setBrand(updatedCar.getBrand());
         _car.setLogoURL(updatedCar.getLogoURL());

@@ -1,6 +1,7 @@
 package com.team.fithniti.demo.service.impl;
 
 import com.team.fithniti.demo.exception.InvalidResource;
+import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.City;
 import com.team.fithniti.demo.model.CountryState;
@@ -75,7 +76,7 @@ public class CityServiceImpl implements CityService {
             throw new InvalidResource(null, "INVALID_COUNTRY_STATE", "This country state does not exist");
         }
         if (existsByCountryNameAndStateNameAndCityName(countryName, countryStateName, city.getName())) {
-            throw new InvalidResource(null, "INVALID_CITY", "This city exists already");
+            throw new ResourceExists("EXIST", "This city name exists already");
         }
         CountryState countryState = countryStateService.getCountryStateByCountryNameAndName(countryName, countryStateName);
         city.setState(countryState);
@@ -91,7 +92,7 @@ public class CityServiceImpl implements CityService {
             throw new InvalidResource(null, "INVALID_COUNTRY_STATE", "This country state does not exist");
         }
         if (existsByCountryNameAndStateNameAndCityName(countryName, countryStateName, updatedCity.getName())) {
-            throw new InvalidResource(null, "INVALID_CITY", "This city exists already");
+            throw new ResourceExists("EXIST", "This city name exists already");
         }
         City _city = getCity(cityId, countryName, countryStateName);
         _city.setName(updatedCity.getName());
