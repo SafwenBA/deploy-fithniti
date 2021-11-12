@@ -30,7 +30,7 @@ public class Passenger {
     @OneToMany(mappedBy = "passenger", cascade = CascadeType.REMOVE, orphanRemoval = true)
     List<PassengerReview> passengerReviews;
 
-    
+    private int reportsCount ;
     @OneToOne
     private AppUser user;
 

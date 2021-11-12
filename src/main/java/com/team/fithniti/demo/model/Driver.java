@@ -30,6 +30,8 @@ public class Driver {
     @OneToOne
     private AppUser user;
 
+    private int reportsCount ;
+
     public Driver(AppUser user) {
         this.user = user;
     }
