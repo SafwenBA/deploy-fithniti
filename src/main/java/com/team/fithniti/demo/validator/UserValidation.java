@@ -1,10 +1,8 @@
 package com.team.fithniti.demo.validator;
 
-import com.team.fithniti.demo.dto.NewUser;
-import com.team.fithniti.demo.model.AppUser;
+import com.team.fithniti.demo.dto.request.NewUser;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class UserValidation {
@@ -23,6 +21,9 @@ public class UserValidation {
 
     public static boolean validatePhoneNumber(String phoneNumber){
         return phoneNumber.matches("\\+216[0-9]{8}") ;
+    }
 
+    public static boolean validatePassword(String password){
+        return (password.length() < 5) ;
     }
 }

@@ -9,7 +9,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.UUID;
 @Data
 @AllArgsConstructor
@@ -20,13 +19,12 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private UserState state;
-
     private String phoneNumber;
     private String address;
     private LocalDate birthDate;
     private String photoURL;
-    private String defaultProfile; // enum : DRIVER, PASSENGER
-    public static UserDTO fromEntity(AppUser user){
+
+    public static UserDTO fromEntity(AppUser user,DriverDto driver, PassengerDto passenger){
         if(user == null)
             throw new InvalidResource(null,"INVALID_ENTITY","Can't map null entity");
         return UserDTO.builder()
@@ -37,8 +35,9 @@ public class UserDTO {
                 .birthDate(user.getBirthDate())
                 .phoneNumber(user.getPhoneNumber()) //add field to show/hide private data like address or phone
                 .state(user.getState())
-                .photoURL(user.getEncodedLogo())
-                .defaultProfile("PASSENGER") // todo: --> dynamic
+                .photoURL(user.getPhotoURL())
+                .driver(driver)
+                .passenger(passenger)
                 .build();
     }
 }

@@ -1,4 +1,4 @@
-package com.team.fithniti.demo.dto;
+package com.team.fithniti.demo.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

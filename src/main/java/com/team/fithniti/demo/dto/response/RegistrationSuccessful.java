@@ -1,4 +1,4 @@
-package com.team.fithniti.demo.dto;
+package com.team.fithniti.demo.dto.response;
 
 import com.team.fithniti.demo.model.AppUser;
 import lombok.AllArgsConstructor;

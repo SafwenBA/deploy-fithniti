@@ -6,11 +6,13 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import javax.persistence.*;
+import java.time.LocalDate;
+import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import javax.persistence.*;
-import java.time.LocalDate;
+
 import java.util.*;
 
 @Entity
@@ -32,35 +34,40 @@ public class AppUser extends Auditable implements UserDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
     private UserState state;
-    private String encodedLogo ;
-    private boolean confirmed ;
+    private String photoURL;
+    private boolean confirmed  ;
+    private UserType lastConnectedAs ;
 
     @OneToOne
-    @JoinColumn(name = "role_id")
+    @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name
     private Role role;
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<SimpleGrantedAuthority> authories = new ArrayList<>() ;
-        authories.add(new SimpleGrantedAuthority(role.getName())) ;
-        return authories;
+        SimpleGrantedAuthority simpleGrantedAuthority = new SimpleGrantedAuthority(AppUserRole.USER.name());
+        return Collections.singletonList(simpleGrantedAuthority);
     }
 
 
     @Override
     public String getUsername() {
-        return getPhoneNumber();
+        return phoneNumber;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return confirmed ;
+        return true ;
     }
 
     @Override

@@ -2,31 +2,28 @@ package com.team.fithniti.demo.controller;
 
 
 import com.team.fithniti.demo.controller.api.AuthAPI;
-import com.team.fithniti.demo.dto.NewUser;
-import com.team.fithniti.demo.dto.RecoveryResponse;
-import com.team.fithniti.demo.dto.RegistrationSuccessful;
-import com.team.fithniti.demo.dto.VerificationResponse;
-import com.team.fithniti.demo.exception.InvalidResource;
-import com.team.fithniti.demo.model.AppUser;
+import com.team.fithniti.demo.dto.request.*;
+import com.team.fithniti.demo.dto.response.AuthenticationResponse;
+import com.team.fithniti.demo.dto.response.RecoveryResponse;
+import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
+import com.team.fithniti.demo.dto.response.VerificationResponse;
 import com.team.fithniti.demo.service.UserService;
-import com.team.fithniti.demo.validator.UserValidation;
-import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
-@AllArgsConstructor
 public class AuthController implements AuthAPI {
 
     @Autowired
-    private final UserService userService ;
+    private UserService userService ;
+    private final String secret = "Wx[3U$NN?Zdc}t*z" ;
+
 
     @Override
     @PostMapping("/register")
@@ -34,15 +31,10 @@ public class AuthController implements AuthAPI {
         return userService.create(user);
     }
 
-    @Override
-    @PostMapping("/recovery/{phoneNumber}")
-    public RecoveryResponse passwordRecovery(@PathVariable String phoneNumber) {
-        return userService.passwordRecovery(phoneNumber) ;
-    }
 
     @Override
     @PostMapping("/verify")
-    public VerificationResponse verifyAccount(@RequestParam UUID user_id,@RequestParam String verificationCode) {
+    public VerificationResponse verifyAccount(@RequestParam UUID user_id, @RequestParam String verificationCode) {
         return userService.verifyAccount(user_id,verificationCode) ;
     }
 
@@ -50,5 +42,37 @@ public class AuthController implements AuthAPI {
     @PostMapping("/refreshToken")
     public void refreshToken(HttpServletRequest request , HttpServletResponse response) throws IOException {
         userService.refreshToken(request,response);
+    }
+
+
+    @Override
+    @PostMapping("/login")
+    public AuthenticationResponse login(@RequestBody AuthenticationRequest request) {
+        return userService.login(request) ;
+    }
+
+    @Override
+    @GetMapping("/recovery")
+    public RecoveryResponse requestPasswordRecovery(@RequestBody RecoveryRequest request) {
+        return userService.requestPasswordRecovery(request) ;
+    }
+
+
+    @Override
+    @PostMapping("/recovery")
+    public RecoveryResponse validateRecoveryCode(@RequestBody RecoveryValidationRequest request) {
+        return userService.validateRecoveryCode(request);
+    }
+
+    @Override
+    @PutMapping("/recovery")
+    public RecoveryResponse updateForgottenPassword(@RequestBody UpdatePasswordRequest request) {
+        return userService.updateForgottenPassword(request);
+    }
+
+    @Override
+    @GetMapping("/recovery/resend")
+    public RecoveryResponse resendRecoveryPassword(@RequestBody RecoveryRequest request){
+        return userService.resendRecoveryPassword(request) ;
     }
 }

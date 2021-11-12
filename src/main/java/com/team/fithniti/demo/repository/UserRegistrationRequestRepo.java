@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.repository;
 
+import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.model.UserRegistrationRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
