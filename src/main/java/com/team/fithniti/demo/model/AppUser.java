@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -30,14 +30,13 @@ public class AppUser extends Auditable implements UserDetails {
     private String lastName;
     private String address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
-    @Temporal(TemporalType.DATE)
-    private Date birthDate;
+    private LocalDate birthDate;
     private UserState state;
     private String encodedLogo ;
     private boolean confirmed ;
 
     @OneToOne
-    @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name
+    @JoinColumn(name = "role_id")
     private Role role;
 
 

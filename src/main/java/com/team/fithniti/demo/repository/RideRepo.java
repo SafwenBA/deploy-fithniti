@@ -1,14 +1,11 @@
 package com.team.fithniti.demo.repository;
 
-import com.team.fithniti.demo.model.Driver;
 import com.team.fithniti.demo.model.Ride;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.querydsl.QuerydslPredicateExecutor;
 
-import java.util.List;
-import java.util.Optional;
 
-public interface RideRepo extends JpaRepository<Ride,Long> {
+public interface RideRepo extends JpaRepository<Ride,Long>, QuerydslPredicateExecutor<Ride> {
     @Override
     void delete(Ride entity);
 }

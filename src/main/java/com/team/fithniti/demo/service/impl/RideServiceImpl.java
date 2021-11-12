@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.service.impl;
 
+import com.querydsl.core.BooleanBuilder;
 import com.team.fithniti.demo.dto.RideFilterOption;
 import com.team.fithniti.demo.dto.request.NewRide;
 import com.team.fithniti.demo.dto.response.RideDTO;
@@ -7,25 +8,31 @@ import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.model.Driver;
+import com.team.fithniti.demo.model.QRide;
 import com.team.fithniti.demo.model.Ride;
 import com.team.fithniti.demo.repository.RideRepo;
 import com.team.fithniti.demo.service.RideService;
 import com.team.fithniti.demo.util.Order;
+import com.team.fithniti.demo.util.RideState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 
 
 @Service
+@Transactional
 public class RideServiceImpl implements RideService{
     @Autowired
     private RideRepo rideRepo;
-
 
     @Override
     public RideDTO create(NewRide ride) {
@@ -40,6 +47,7 @@ public class RideServiceImpl implements RideService{
                         .description(ride.getDescription())
                         .startTime(ride.getStartTime())
                         .maxPlaces(ride.getMaxPlaces())
+                        .availablePlaces(ride.getMaxPlaces())
                         .pathway(ride.getPathway())
                         .price(ride.getPrice())
                         .rideType(ride.getRideType())
@@ -57,17 +65,54 @@ public class RideServiceImpl implements RideService{
     }
 
     @Override
+    public Ride findEntityById(Long id) {
+        return rideRepo.findById(id).orElseThrow(
+                () -> new ResourceNotFound("INVALID_RIDE","No Ride found"));
+    }
+
+    @Override
     public Page<RideDTO> findAll(RideFilterOption options) {
-        // TODO: 11/4/21 impl the rest
-        Sort.Direction sort = ( options.getOrder().equals(Order.ASC)) ? Sort.Direction.ASC : Sort.Direction.DESC ;
-        PageRequest pageRequest = PageRequest.of(options.getPage(), options.getLimit(), sort,options.getProperties());
-        return  rideRepo.findAll(pageRequest).map(RideDTO::fromEntity);
+        BooleanBuilder builder = new BooleanBuilder();
+        final QRide qRide = QRide.ride;
+        return doYourJob(qRide,builder,options);
     }
 
     @Override
     public Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options) {
-        // TODO: 11/4/21 impl the rest + Q_DSL
-        return null;
+        BooleanBuilder builder = new BooleanBuilder();
+        final QRide qRide = QRide.ride;
+        builder.and(qRide.driver.id.eq(driverId));
+        return doYourJob(qRide, builder, options);
+    }
+
+    private Page<RideDTO> doYourJob(QRide qRide, BooleanBuilder builder, RideFilterOption options) {
+        if ( options == null ){
+            builder.and(qRide.startTime.after(LocalTime.now().plusMinutes(15))).and(qRide.rideState.eq(RideState.PENDING));
+        }
+        else {
+            if ( options.getMaxPlaces() != null ) builder.and(qRide.maxPlaces.eq(options.getMaxPlaces()));
+            if ( options.getAvailablePlaces() != null ) builder.and(qRide.availablePlaces.eq(options.getAvailablePlaces()));
+            if ( options.getCarBrand() != null ) builder.and(qRide.car.brand.equalsIgnoreCase(options.getCarBrand()));
+            if ( options.getCarModel() != null ) builder.and(qRide.carModel.model.equalsIgnoreCase(options.getCarModel()));
+            if ( options.getRideState() != null ) builder.and(qRide.rideState.eq(options.getRideState()));
+            if ( options.getRideType() != null ) builder.and(qRide.rideType.eq(options.getRideType()));
+            if ( options.getMaxPrice() > options.getMinPrice() ) builder.and(qRide.price.between(options.getMinPrice(), options.getMaxPrice()));
+
+            if ( options.getMaxDriverRating() > options.getMinDriverRating() ) builder.and(qRide.driver.rating.between(options.getMaxDriverRating() , options.getMinDriverRating()));
+            if ( options.getPathway() != null ) builder.and(qRide.pathway.eq(options.getPathway()));
+
+            if ( options.getStartDate() != null ) {
+                LocalDateTime day_1 = options.getStartDate().atTime(LocalTime.now()).minusDays(1);
+                LocalDateTime day_2 = options.getStartDate().atTime(LocalTime.now()).plusDays(1);
+                builder.and(qRide.createdDate.between(day_1,day_2));
+            }
+            if ( options.getStartTimeTo().isAfter(options.getStartTimeFrom()) ) builder.and(qRide.startTime.between(options.getStartTimeFrom(), options.getStartTimeTo()));
+            if ( options.getTags() != null && !options.getTags().isEmpty()) builder.and(qRide.maxPlaces.eq(options.getMaxPlaces()));
+        }
+        // validate options.getProperties() : in class.getFields
+        Sort.Direction sort = ( options.getOrder().equals(Order.ASC)) ? Sort.Direction.ASC : Sort.Direction.DESC ;
+        PageRequest pageRequest = PageRequest.of(options.getPage(), options.getLimit(), sort,options.getProperties());
+        return (builder.getValue() != null ) ? rideRepo.findAll(builder,pageRequest).map(RideDTO::fromEntity) : rideRepo.findAll(pageRequest).map(RideDTO::fromEntity);
     }
 
     @Override
@@ -77,6 +122,43 @@ public class RideServiceImpl implements RideService{
 
     @Override
     public void update(Long rideId, Long driverId, Map<String, Object> changes) {
-        // TODO: 11/4/21 impl
+        try {
+            final Ride ride = findEntityById(rideId);
+            changes.forEach((k, v) -> {
+                switch (k){
+                    case "RideState": {
+                        ride.setRideState((RideState) v);
+                        // push notif
+                        break;
+                    }
+                    case "startTime": {
+                        assert ((LocalTime) v).isAfter(LocalTime.now().plusMinutes(15));
+//                        assert driver.id = authUser.id or is admin, or auto update as  +-availablePlaces
+//                        assert ride.state = pending --> doJob()
+                        ride.setStartTime((LocalTime) v);
+                        // push notif
+                        break;
+                    }
+                    case "maxPlaces": {
+                        ride.setMaxPlaces((Byte) v);
+                        //...
+                        break;
+                    }
+                    case "availablePlaces": {
+                        Byte availablePlaces = ride.getAvailablePlaces();
+                        if (availablePlaces == ride.getMaxPlaces()){
+                            throw new InvalidResource("Max limit exceeded","Failed to update availablePlaces");
+                        }
+                        availablePlaces++;
+                        ride.setAvailablePlaces(availablePlaces);
+                        rideRepo.save(ride);
+                        break;
+                    }
+                    // TODO: carry on
+                }
+            });
+        }catch (Exception e){
+            throw new  InvalidResource("FAILED_TO_UPDATE_RIDE",e.getMessage());
+        }
     }
 }

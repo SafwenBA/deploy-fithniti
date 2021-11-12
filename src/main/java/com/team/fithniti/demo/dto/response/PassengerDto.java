@@ -15,17 +15,16 @@ public class PassengerDto {
     private Long id;
     private double rating;
     private Integer ridesNumber;
-    // par defaut yraj3lou coming Rides etc
-    // 7ajtou b7aja o5ra ya3ml request :p
-    //*
+    private UserDTO user;
 
-    public PassengerDto fromEntity(Passenger passenger){
+    public static PassengerDto fromEntity(Passenger passenger){
         if (passenger == null)
             throw new InvalidResource(null,"INTERNAL ERROR","Can't map null entity");
         return PassengerDto.builder()
                 .id(passenger.getId())
                 .rating(passenger.getRating())
                 .ridesNumber(passenger.getRidesNumber())
+                .user(UserDTO.fromEntity(passenger.getUser()))
                 .build();
     }
 

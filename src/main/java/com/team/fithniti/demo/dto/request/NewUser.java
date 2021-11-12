@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.joda.time.LocalDate;
 
+import java.util.Date;
+
 /**
  * Only required fields for registration
  */
@@ -19,6 +21,6 @@ public class NewUser {
     private String lastName;
     private String phoneNumber;
     private String address;
-    private LocalDate birthDate;
+    private Date birthDate;
     private String role;
 }

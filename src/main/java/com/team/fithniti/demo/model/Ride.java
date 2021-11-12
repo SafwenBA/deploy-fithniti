@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.model;
 
+import com.querydsl.core.annotations.QueryEntity;
 import com.team.fithniti.demo.util.RideState;
 import com.team.fithniti.demo.util.RideType;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@QueryEntity
 public class Ride extends Auditable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

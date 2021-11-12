@@ -2,6 +2,7 @@ package com.team.fithniti.demo.dto.response;
 
 import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.model.Driver;
+import com.team.fithniti.demo.model.Passenger;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +16,7 @@ public class DriverDto {
     private Long id;
     private double rating;
     private Integer ridesNumber;
-    // coming Rides etc
+    private UserDTO user;
 
     public static DriverDto fromEntity(Driver driver){
         if (driver == null)
@@ -24,7 +25,8 @@ public class DriverDto {
                 .id(driver.getId())
                 .rating(driver.getRating())
                 .ridesNumber(driver.getRidesNumber())
-                //* to complete
+                .user(UserDTO.fromEntity(driver.getUser()))
                 .build();
     }
+
 }
