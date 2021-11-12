@@ -15,8 +15,11 @@ public class ResourceNotFound extends RuntimeException{
     public ResourceNotFound(String errorCode, String msg) {
         super(msg);
         this.errorCode = errorCode;
+<<<<<<< HEAD
     }
     public ResourceNotFound(String message) {
         super(message) ;
+=======
+>>>>>>> origin/dev-hamdi
     }
 }

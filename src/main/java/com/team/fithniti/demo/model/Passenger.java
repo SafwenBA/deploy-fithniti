@@ -37,4 +37,5 @@ public class Passenger {
     public Passenger(AppUser user) {
         this.user = user;
     }
+
 }

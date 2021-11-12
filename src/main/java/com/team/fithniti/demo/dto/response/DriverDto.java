@@ -2,10 +2,13 @@ package com.team.fithniti.demo.dto.response;
 
 import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.model.Driver;
+import com.team.fithniti.demo.model.Ride;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -16,6 +19,7 @@ public class DriverDto {
     private double rating;
     private Integer ridesNumber;
     // coming Rides etc
+
 
     public static DriverDto fromEntity(Driver driver){
         if (driver == null)

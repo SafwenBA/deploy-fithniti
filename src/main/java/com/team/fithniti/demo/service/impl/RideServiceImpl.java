@@ -3,7 +3,6 @@ package com.team.fithniti.demo.service.impl;
 import com.team.fithniti.demo.dto.RideFilterOption;
 import com.team.fithniti.demo.dto.request.NewRide;
 import com.team.fithniti.demo.dto.response.RideDTO;
-import com.team.fithniti.demo.dto.response.TagDto;
 import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.AppUser;
@@ -12,14 +11,13 @@ import com.team.fithniti.demo.model.Ride;
 import com.team.fithniti.demo.repository.RideRepo;
 import com.team.fithniti.demo.service.RideService;
 import com.team.fithniti.demo.util.Order;
-import com.team.fithniti.demo.validator.RideValidation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Map;
 
 
@@ -37,20 +35,6 @@ public class RideServiceImpl implements RideService{
 
         Driver driver = new Driver(); // == driverService.findById(ride.getDriverId)
         AppUser user = driver.getUser();
-        // checkUserAccess(user) ; //
-//        Example
-//        private void checkUserAccess(AppUser user){
-//            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//            AppUser authenticatedUser = userDao.findByLogin(authentication.getName()).orElseThrow(() -> new ResourceNotFoundException("Oops!, Something went wrong"));
-//            if ( ! user.equals(authenticatedUser) && !authenticatedUser.isAdmin() ) {
-//                throw new AccessDeniedException("Oops! You don't have permissions!");
-//            }
-//        }
-
-        // end checkUser
-
-//        CarService.findByBrand(ride.getCar().getBrand(),ride.getCar().getCarModel());
-
         return RideDTO.fromEntity(
                 rideRepo.save( Ride.builder()
                         .description(ride.getDescription())
