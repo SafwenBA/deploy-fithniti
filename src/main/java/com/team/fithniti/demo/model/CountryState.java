@@ -6,25 +6,28 @@ import lombok.*;
 import javax.persistence.*;
 import java.util.List;
 
-@Table(name = "countries")
+@Table(name = "country_states")
 @Setter
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
 @Entity
-public class Country {
+public class CountryState {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", unique = true)
+    @Column(name = "name")
     private String name;
 
-    @Column(name = "flagImageURL")
-    private String flagImageURL;
+    @ManyToOne
+    @JoinColumn(name = "country_id", referencedColumnName = "id")
+    private Country country;
 
-    @OneToMany(targetEntity = CountryState.class, mappedBy = "country", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    @OneToMany(targetEntity = City.class, mappedBy = "state", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @JsonIgnore
-    List<CountryState> countryStates;
+    List<City> cities;
 }
+

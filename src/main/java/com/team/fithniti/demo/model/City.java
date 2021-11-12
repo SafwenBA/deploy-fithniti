@@ -1,23 +1,28 @@
 package com.team.fithniti.demo.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+
+import lombok.*;
 
 import javax.persistence.*;
 
-
-@Entity
 @Table(name = "cities")
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@Entity
 public class City {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "name")
     private String name;
 
     @ManyToOne
-    private Governorate governorate;
+    @JoinColumn(name = "state_id")
+    private CountryState state;
+
 }

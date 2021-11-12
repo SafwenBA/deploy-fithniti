@@ -1,23 +1,30 @@
 package com.team.fithniti.demo.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
 @Table(name = "cars")
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Car extends Auditable{
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+@ToString
+@Entity
+public class Car extends Auditable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true, nullable = false)
     private String brand;
+
+    @Column(name = "logoURL")
     private String logoURL;
 
-    @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<CarModel> carModels ;
+    @OneToMany(targetEntity = CarModel.class, mappedBy = "car",cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    @JsonIgnore
+    List<CarModel> carModels;
 }
