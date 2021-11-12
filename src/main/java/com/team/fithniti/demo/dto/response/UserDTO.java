@@ -36,8 +36,6 @@ public class UserDTO {
                 .phoneNumber(user.getPhoneNumber()) //add field to show/hide private data like address or phone
                 .state(user.getState())
                 .photoURL(user.getPhotoURL())
-                .driver(driver)
-                .passenger(passenger)
                 .build();
     }
 }

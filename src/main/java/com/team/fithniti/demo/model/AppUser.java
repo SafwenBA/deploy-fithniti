@@ -1,7 +1,9 @@
 package com.team.fithniti.demo.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.team.fithniti.demo.util.AppUserRole;
 import com.team.fithniti.demo.util.UserState;
+import com.team.fithniti.demo.util.UserType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,7 +27,6 @@ public class AppUser extends Auditable implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
-
     private String phoneNumber;
     private String password;
     private String firstName;
@@ -36,7 +37,7 @@ public class AppUser extends Auditable implements UserDetails {
     private UserState state;
     private String photoURL;
     private boolean confirmed  ;
-    private UserType lastConnectedAs ;
+    private UserType lastConnectedAs;
 
     @OneToOne
     @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name
