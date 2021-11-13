@@ -21,5 +21,7 @@ public interface ReportService {
     //must be added to ReportHandle table
     HandledReportDTO createHandledReport(ReportHandler newReportHandled);
     //get the list of user with report counter >= x
-    List<ReportCard> getGroupedReports(int x, ReportFilter options);//TODO: consider having default value
+    Page<ReportCard> getUserListWithReportCounter(int x, ReportFilter options);//TODO: consider having default value
+    //get all report for specific passenger
+    Page<RideReportDTO> getAllPassengerReportsById(UUID passengerId, int page, int size, boolean sorted);
 }

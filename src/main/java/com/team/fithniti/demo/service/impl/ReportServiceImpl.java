@@ -6,7 +6,10 @@ import com.team.fithniti.demo.dto.response.HandledReportDTO;
 import com.team.fithniti.demo.dto.response.ReportCard;
 import com.team.fithniti.demo.dto.response.RideReportDTO;
 import com.team.fithniti.demo.exception.ResourceNotFound;
-import com.team.fithniti.demo.model.*;
+import com.team.fithniti.demo.model.AppUser;
+import com.team.fithniti.demo.model.HandledReport;
+import com.team.fithniti.demo.model.Ride;
+import com.team.fithniti.demo.model.RideReport;
 import com.team.fithniti.demo.repository.*;
 import com.team.fithniti.demo.service.ReportService;
 import com.team.fithniti.demo.util.ReportAction;
@@ -18,7 +21,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -38,13 +40,13 @@ public class ReportServiceImpl implements ReportService {
     private PassengerRepo passengerRepo;
 
     @Autowired
+    private DriverRepo driverRepo;
+
+    @Autowired
     private UserRepo userRepo;
 
     @Autowired
     private ReportTypeRepo reportTypeRepo;
-
-    @Autowired
-    private DriverRepo driverRepo;
 
     @Override
     public RideReportDTO createRideReport(NewReport newReport) {
@@ -81,12 +83,21 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Page<RideReportDTO> getAllDriverReportsById(UUID driverId, int page, int size, boolean sorted) {
-        //existence check
-        Optional<AppUser> driver = userRepo.findById(driverId);
-        if(driver.isEmpty()) throw new ResourceNotFound("driver not even an app user");
-        if(driverRepo.findByUser(driver.get()).isEmpty()) throw new ResourceNotFound("driver not found");
+        return getAllEntitiesReportsById(driverId, true, page, size, sorted);
+    }
+
+    @Override
+    public Page<RideReportDTO> getAllPassengerReportsById(UUID passengerId, int page, int size, boolean sorted) {
+        return getAllEntitiesReportsById(passengerId, false, page, size, sorted);
+    }
+
+    private Page<RideReportDTO> getAllEntitiesReportsById(UUID id, boolean isDriver,  int page, int size, boolean sorted){
+        Optional<AppUser> entity = userRepo.findById(id);
+        if(entity.isEmpty()) throw new ResourceNotFound("driver not even an app user");
+        if(driverRepo.findByUser(entity.get()).isEmpty() && isDriver) throw new ResourceNotFound("driver not found");
+        if(passengerRepo.findByUser(entity.get()).isEmpty()) throw new ResourceNotFound("passenger not found");
         Pageable pageable = sorted ? PageRequest.of(page, size, Sort.by("createdDate")) : PageRequest.of(page, size);
-        return rideReportRepo.findAllByDriver(driverId, pageable).map(RideReportDTO::fromEntity);
+        return (isDriver ? rideReportRepo.findAllByDriver(id, pageable) : rideReportRepo.findAllByPassengerId(id, pageable)).map(RideReportDTO::fromEntity);
     }
 
     @Override
@@ -104,16 +115,34 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public List<ReportCard> getGroupedReports(int x, ReportFilter options) {
+    public Page<ReportCard> getUserListWithReportCounter(int x, ReportFilter options) {
         switch (options){
             case DRIVER:{
-
+                return driverRepo.getDriversByReportsCountGreaterThan(x,
+                        PageRequest.of(1,10, Sort.by("reportsCounter"))//TODO: GET THOSE VALUES
+                ).map(driver -> ReportCard.builder()
+                        .firstName(driver.getUser().getFirstName())
+                        .lastName(driver.getUser().getLastName())
+                        .phoneNumber(driver.getUser().getPhoneNumber())
+                        .photoURL(driver.getUser().getPhotoUrl())
+                        .nbrReport(driver.getReportsCount())
+                        .build()
+                );
             }
             case PASSENGER:{
-
+                return passengerRepo.getPassengersByReportsCountGreaterThan(x,
+                        PageRequest.of(1,10, Sort.by("reportsCounter"))//TODO: GET THOSE VALUES
+                ).map(passenger -> ReportCard.builder()
+                        .firstName(passenger.getUser().getFirstName())
+                        .lastName(passenger.getUser().getLastName())
+                        .phoneNumber(passenger.getUser().getPhoneNumber())
+                        .photoURL(passenger.getUser().getPhotoUrl())
+                        .nbrReport(passenger.getReportsCount())
+                        .build()
+                );
             }
             case ALL:{
-
+                //TODO: JOIN DRIVE AND PASSENGER
             }
         }
         return null;
