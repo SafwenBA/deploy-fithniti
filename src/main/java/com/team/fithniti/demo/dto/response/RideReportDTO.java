@@ -1,10 +1,10 @@
 package com.team.fithniti.demo.dto.response;
 
 import com.team.fithniti.demo.exception.InvalidResource;
-import com.team.fithniti.demo.model.Passenger;
+import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.model.ReportType;
 import com.team.fithniti.demo.model.RideReport;
-import com.team.fithniti.demo.util.ReportedBy;
+import com.team.fithniti.demo.util.ReportStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @AllArgsConstructor
@@ -20,10 +19,11 @@ import java.util.stream.Collectors;
 @Builder
 public class RideReportDTO {
     private Long id;
-    private ReportedBy reportedBy;
     private List<ReportType> reportTypes;
     private RideDTO rideDTO;
-    private Passenger passenger;
+    private AppUser reported;
+    private AppUser reporter;
+    private ReportStatus reportStatus;
 
     public static RideReportDTO fromEntity(RideReport rideReport){
         if(rideReport == null){
@@ -31,11 +31,12 @@ public class RideReportDTO {
         }
         return RideReportDTO.builder()
                 .id(rideReport.getId())
-                .reportedBy(rideReport.getReportedBy())
-                .passenger(rideReport.getPassenger())
-                .rideDTO( RideDTO.fromEntity(rideReport.getRide()))
-                .reportTypes( (rideReport.getReportTypes() == null) ? new ArrayList<>() :
-                        new ArrayList<>(rideReport.getReportTypes()))
+                .rideDTO(RideDTO.fromEntity(rideReport.getRide()))
+                .reported(rideReport.getReported())
+                .reporter(rideReport.getReporter())
+                .reportStatus(rideReport.getReportStatus())
+                .reportTypes((rideReport.getReportTypes() == null) ? new ArrayList<>() :
+                        rideReport.getReportTypes())
                 .build();
     }
 }

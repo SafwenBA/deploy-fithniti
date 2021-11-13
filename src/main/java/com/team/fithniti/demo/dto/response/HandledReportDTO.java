@@ -26,8 +26,8 @@ public class HandledReportDTO {
             throw new InvalidResource(null, "", "");//TODO: WRITE SOME FUCKING CODE YOU BASTARD
         return HandledReportDTO.builder()
                 .id(handledReport.getId())
-                .action(handledReport.getAction())
                 .reason(handledReport.getReason())
+                .action(handledReport.getAction())
                 .admin(handledReport.getAdmin())
                 .rideReport(handledReport.getRideReport())
                 .build();
