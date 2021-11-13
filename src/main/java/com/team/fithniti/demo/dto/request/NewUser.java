@@ -25,7 +25,7 @@ public class NewUser {
     private String address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
-    private String encodedLogo ;
+    private String photoUrl ;
 
 
     public AppUser convertToAppUser(){
@@ -34,7 +34,7 @@ public class NewUser {
                 .lastName(this.getLastName())
                 .phoneNumber(this.getPhoneNumber())
                 .password(new BCryptPasswordEncoder().encode(this.getPassword()))
-                .encodedLogo(this.getEncodedLogo())
+                .photoUrl(this.getPhotoUrl())
                 .address(this.getAddress())
                 .birthDate(this.getBirthDate())
                 .build() ;

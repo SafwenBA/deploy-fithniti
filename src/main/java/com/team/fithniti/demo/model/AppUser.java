@@ -35,9 +35,10 @@ public class AppUser extends Auditable implements UserDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
     private UserState state;
-    private String encodedLogo ;
+    private String photoUrl ;
     private boolean confirmed  ;
     private UserType lastConnectedAs ;
+    private int alertsCount ;
 
     @OneToOne
     @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name

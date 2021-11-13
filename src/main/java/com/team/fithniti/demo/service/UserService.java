@@ -19,6 +19,7 @@ public interface UserService {
     RecoveryResponse resendRecoveryPassword(RecoveryRequest recoveryRequest) ;
     RecoveryResponse validateRecoveryCode(RecoveryValidationRequest validationRequest);
     RecoveryResponse updateForgottenPassword(UpdatePasswordRequest updateRequest);
+    WarningDismiss dismissWarning(UUID user_id) ;
     RoleChange changeRole(UUID user_id , Integer role_id) ;
     void refreshToken(HttpServletRequest request , HttpServletResponse response) throws IOException;
     UUID getIdByUsername(String phoneNumber) ;
