@@ -3,17 +3,22 @@ package com.team.fithniti.demo.service.impl;
 import com.team.fithniti.demo.dto.request.NewReport;
 import com.team.fithniti.demo.dto.request.ReportHandler;
 import com.team.fithniti.demo.dto.response.HandledReportDTO;
+import com.team.fithniti.demo.dto.response.ReportCard;
 import com.team.fithniti.demo.dto.response.RideReportDTO;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.*;
 import com.team.fithniti.demo.service.ReportService;
+import com.team.fithniti.demo.util.ReportAction;
+import com.team.fithniti.demo.util.ReportFilter;
+import com.team.fithniti.demo.util.ReportStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -35,70 +40,82 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private ReportTypeRepo reportTypeRepo;
+
+    @Autowired
+    private DriverRepo driverRepo;
+
     @Override
-    public RideReportDTO createRideReport(NewReport report) {
-        Optional<Ride> ride = rideRepo.findById(report.getRideId());
-        if(ride.isEmpty())
-            throw new ResourceNotFound("ride does not exist");//TODO: maybe refactor
-        Optional<Passenger> passenger = passengerRepo.findById(report.getPassengerId());
-        if(passenger.isEmpty())
-            throw new ResourceNotFound("user does not exist");//TODO: same
+    public RideReportDTO createRideReport(NewReport newReport) {
+        Optional<Ride> ride = rideRepo.findById(newReport.getRideId());
+        //check if those nibbas exist
+        if(ride.isEmpty()) throw new ResourceNotFound("ride not found");//TODO: verify this bitch later
+        if(!userRepo.existsById(newReport.getReportedId())) throw new ResourceNotFound("reported not found");
+        if(!userRepo.existsById(newReport.getReporterId())) throw new ResourceNotFound("reporter not found");
+        //check if they belong to the same ride
+        //TODO: check those mfs
+        //add rideReport
         RideReport rideReport = RideReport.builder()
+                .reportTypes(newReport.getReportTypes().stream().map(
+                        element -> reportTypeRepo.getById(element)
+                ).collect(Collectors.toList()))
                 .ride(ride.get())
-                .passenger(passenger.get())
-                .reportedBy(report.getReportedBy())
-                .reportTypes(new ArrayList<>(report.getReportTypes()))//TODO: CHECK IF THIS IS RIGHT
+                .reported(userRepo.getById(newReport.getReportedId()))
+                .reporter(userRepo.getById(newReport.getReporterId()))
+                .reportStatus(ReportStatus.valueOf(newReport.getStatus()))
                 .build();
+        //check whenever reported guy is driver or passenger
+        if(newReport.getReportedId() == ride.get().getDriver().getUser().getId() ){
+            //reported is the driver
+            //Increment driver report counter by
+            //DriverService.updateReportCounter(UUID driver)
+        }else{
+            //he is not the driver
+            //Increment Passenger report counter by
+            //PassengerService.updateReportCounter(UUID passenger)
+        }
         rideReportRepo.save(rideReport);
         return RideReportDTO.fromEntity(rideReport);
     }
 
     @Override
-    public Page<RideReportDTO> getAllReportsForAdmin(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return rideReportRepo.findAll(pageable).map(RideReportDTO::fromEntity);//TODO: check why other function where pretty much fucked up
+    public Page<RideReportDTO> getAllDriverReportsById(UUID driverId, int page, int size, boolean sorted) {
+        //existence check
+        Optional<AppUser> driver = userRepo.findById(driverId);
+        if(driver.isEmpty()) throw new ResourceNotFound("driver not even an app user");
+        if(driverRepo.findByUser(driver.get()).isEmpty()) throw new ResourceNotFound("driver not found");
+        Pageable pageable = sorted ? PageRequest.of(page, size, Sort.by("createdDate")) : PageRequest.of(page, size);
+        return rideReportRepo.findAllByDriver(driverId, pageable).map(RideReportDTO::fromEntity);
     }
 
     @Override
-    public Page<RideReportDTO> getAllReportsForUser(UUID passengerId, int page, int size) {
-//        Optional<AppUser> user = userRepo.findById(passengerId);
-//        if(user.isEmpty())
-//            throw new ResourceNotFound("user not found");
-//        return (Page<RideReportDTO>) rideReportRepo.findAllByPassenger(passenger.get(), PageRequest.of(page,size)).stream().map(RideReportDTO::fromEntity).collect(Collectors.toList());
-        //TODO: this is not correct it should be user (driver or passenger) who can get his reports => RideReport fucked up really hard
-        return null;
-    }
-
-    @Override
-    public HandledReportDTO doSomethingAboutThisReport(ReportHandler reportHandler) {
-        Optional<RideReport> rideReport = rideReportRepo.findById(reportHandler.getRideReportId());
-        if(rideReport.isEmpty())
-            throw new ResourceNotFound("report does not exist");
-        Optional<AppUser> admin = userRepo.findById(reportHandler.getAdminId());
-        if(admin.isEmpty())
-            throw new ResourceNotFound("admin not found");
-        //TODO: should be there a method isAdmin
-        switch (reportHandler.getReportAction()){
-           //TODO: add methods in AppUser repo for updating state
-        }
+    public HandledReportDTO createHandledReport(ReportHandler newReportHandled) {
+        if(!rideReportRepo.existsById(newReportHandled.getRideReportId())) throw new ResourceNotFound("ride report not found");
+        //check admin existence after merge
         HandledReport handledReport = HandledReport.builder()
-                .action(reportHandler.getReportAction())
-                .reason(reportHandler.getReason())
-                .admin(admin.get())
-                .rideReport(rideReport.get())
+                .action(ReportAction.valueOf(newReportHandled.getReportAction()))
+                .reason(newReportHandled.getReason())
+                .admin(userRepo.getById(newReportHandled.getAdminId()))//TODO: adminRepo.getAdminById() after merge
+                .rideReport(rideReportRepo.getById(newReportHandled.getRideReportId()))
                 .build();
         handledReportRepo.save(handledReport);
         return HandledReportDTO.formEntity(handledReport);
     }
 
     @Override
-    public Page<HandledReportDTO> getAllHandledReportsByAdminId(UUID adminId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Optional<AppUser> admin = userRepo.findById(adminId);
-        if(admin.isEmpty())
-            throw new ResourceNotFound("admin not found");
-        //TODO: should be there a method isAdmin
-        //TODO: extract this code cuz its repetitive
-        return (Page<HandledReportDTO>) handledReportRepo.findAllByAdmin(admin.get(), pageable).stream().map(HandledReportDTO::formEntity).collect(Collectors.toList());
-    }//TODO: not sure if this cast is safe
+    public List<ReportCard> getGroupedReports(int x, ReportFilter options) {
+        switch (options){
+            case DRIVER:{
+
+            }
+            case PASSENGER:{
+
+            }
+            case ALL:{
+
+            }
+        }
+        return null;
+    }
 }
