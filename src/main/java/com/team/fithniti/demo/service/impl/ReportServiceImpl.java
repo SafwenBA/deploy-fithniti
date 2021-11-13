@@ -4,12 +4,10 @@ import com.team.fithniti.demo.dto.request.NewReport;
 import com.team.fithniti.demo.dto.request.ReportHandler;
 import com.team.fithniti.demo.dto.response.HandledReportDTO;
 import com.team.fithniti.demo.dto.response.ReportCard;
+import com.team.fithniti.demo.dto.response.ReportSubmitted;
 import com.team.fithniti.demo.dto.response.RideReportDTO;
 import com.team.fithniti.demo.exception.ResourceNotFound;
-import com.team.fithniti.demo.model.AppUser;
-import com.team.fithniti.demo.model.HandledReport;
-import com.team.fithniti.demo.model.Ride;
-import com.team.fithniti.demo.model.RideReport;
+import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.*;
 import com.team.fithniti.demo.service.ReportService;
 import com.team.fithniti.demo.util.ReportAction;
@@ -21,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -48,8 +47,11 @@ public class ReportServiceImpl implements ReportService {
     @Autowired
     private ReportTypeRepo reportTypeRepo;
 
+    @Autowired
+    private AdminRepo adminRepo;
+
     @Override
-    public RideReportDTO createRideReport(NewReport newReport) {
+    public ReportSubmitted createRideReport(NewReport newReport) {
         Optional<Ride> ride = rideRepo.findById(newReport.getRideId());
         //check if those nibbas exist
         if(ride.isEmpty()) throw new ResourceNotFound("ride not found");//TODO: verify this bitch later
@@ -78,7 +80,10 @@ public class ReportServiceImpl implements ReportService {
             //PassengerService.updateReportCounter(UUID passenger)
         }
         rideReportRepo.save(rideReport);
-        return RideReportDTO.fromEntity(rideReport);
+        return ReportSubmitted.builder()
+                .status("REPORT_SUBMITTED")
+                .message("report has been submitted successfully")
+                .build();
     }
 
     @Override
@@ -104,10 +109,13 @@ public class ReportServiceImpl implements ReportService {
     public HandledReportDTO createHandledReport(ReportHandler newReportHandled) {
         if(!rideReportRepo.existsById(newReportHandled.getRideReportId())) throw new ResourceNotFound("ride report not found");
         //check admin existence after merge
+        if(userRepo.existsById(newReportHandled.getAdminId())) throw new ResourceNotFound("admin not found");
+        Optional<Admin> admin = adminRepo.findByUser(userRepo.getById(newReportHandled.getAdminId()));
+        if(admin.isEmpty()) throw new ResourceNotFound("admin not found");
         HandledReport handledReport = HandledReport.builder()
                 .action(ReportAction.valueOf(newReportHandled.getReportAction()))
                 .reason(newReportHandled.getReason())
-                .admin(userRepo.getById(newReportHandled.getAdminId()))//TODO: adminRepo.getAdminById() after merge
+                .admin(admin.get())//TODO: adminRepo.getAdminById() after merge
                 .rideReport(rideReportRepo.getById(newReportHandled.getRideReportId()))
                 .build();
         handledReportRepo.save(handledReport);
@@ -146,5 +154,18 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<HandledReportDTO> getAllReportsByAdmin(UUID adminId) {
+
+       if(userRepo.existsById(adminId)){
+           Optional<Admin> admin = adminRepo.findByUser(userRepo.getById(adminId));
+           if(admin.isPresent()){
+               return handledReportRepo.findAllByAdmin(admin.get(), PageRequest.of(1,10,Sort.by("createdDate"))).stream().map(HandledReportDTO::formEntity).collect(Collectors.toList());
+           }
+           throw new ResourceNotFound("admin not found");
+       }
+       throw new ResourceNotFound("admin not found");
     }
 }

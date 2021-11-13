@@ -20,7 +20,7 @@ public class HandledReport extends Auditable{
     private String reason;
 
     @OneToOne
-    private AppUser admin;
+    private Admin admin;
 
     @OneToOne
     private RideReport rideReport;
