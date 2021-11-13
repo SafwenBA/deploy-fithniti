@@ -1,13 +1,14 @@
 package com.team.fithniti.demo.repository;
 
-import com.team.fithniti.demo.model.Passenger;
 import com.team.fithniti.demo.model.RideReport;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
-import java.util.List;
+import java.util.UUID;
 
 public interface RideReportRepo extends JpaRepository<RideReport, Long> {
-    List<RideReport> findAllByPassenger(Passenger passenger, Pageable pageable);//here i made an assumption that passenger is the person who made the report
+    @Query("SELECT r FROM RideReport r where r.ride.driver.id = :driverId")
+    Page<RideReport> findAllByDriver(UUID driverId, Pageable pageable);
 }
