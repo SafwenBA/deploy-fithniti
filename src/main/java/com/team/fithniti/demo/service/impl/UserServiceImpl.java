@@ -57,11 +57,12 @@ public class UserServiceImpl implements UserService {
     private final TwilioService twilioService ;
     private final MyUserDetailsService myUserDetailsService;
     private final UserRecoveryRequestRepo userRecoveryRequestRepo ;
-    private final ImageService imageService ;
+
+    // TODO: 11/12/2021 uncomment this after merge with safwen
+    // private final FlickrService flickrService ;
 
     @Autowired
     private final AuthenticationManager authenticationManager;
-
 
     @Override
     public List<AppUser> getAll() {
@@ -79,9 +80,13 @@ public class UserServiceImpl implements UserService {
         AppUser appuser = userRepo.findByPhoneNumber(userDetails.getUsername()).get() ;
         // if the user account is not confirmed
         if (!appuser.isConfirmed())
-            return  new InvalidAuthentication("NOT_CONFIRMED","Please Confirm Your Account ! ")  ;
+            return  new UnconfirmedAuthentication("NOT_CONFIRMED",appuser.getId(),"Please Confirm Your Account ! ")  ;
+        if (appuser.getState() == UserState.PERM_BANNED) {
+            return new InvalidAuthentication("PERMA_BAN","Your account has been banned permanently for violating our code of conduct !") ;
+        }
         UUID userId = appuser.getId();
-        String userLogo = appuser.getEncodedLogo();
+        String userLogo = appuser.getPhotoUrl();
+        String role = appuser.getRole().getName() ;
         Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8)) ;
         Date expiryDate = new Date(System.currentTimeMillis()+ 10000*60*1000) ; // set this back to 10 mins lul , users will die before their token expires :v
         String access_token = JWT.create()
@@ -94,9 +99,7 @@ public class UserServiceImpl implements UserService {
                 .withSubject(userDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
-        return new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate);
-
-
+        return new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate,appuser.getState(),appuser.getLastConnectedAs(),role);
     }
 
     @Override
@@ -118,19 +121,21 @@ public class UserServiceImpl implements UserService {
         AppUser appUser = user.convertToAppUser() ;
         appUser.setState(UserState.ACTIVE);
         appUser.setConfirmed(false);
+        appUser.setAlertsCount(0);
         appUser.setLastConnectedAs(UserType.Passenger);
-        if(appUser.getEncodedLogo() == null || appUser.getEncodedLogo().equals("")){
+        if(appUser.getPhotoUrl() == null || appUser.getPhotoUrl().equals("")){
             // set default logo
             //todo - uncomment this when image service is active
-            appUser.setEncodedLogo(imageService.getDefaultBase64());
+            //appUser.setPhotoUrl(flickrService.getDefaultLogo());
         }
+        // assign the default user role to all new users
+        Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
+        userRole.ifPresent(appUser::setRole);
         userRepo.save(appUser) ;
         // we assign a driver and a passenger objects relative to our AppUser object
         driverRepo.save(Driver.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
         passengerRepo.save(Passenger.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
-        // assign the default user role to all new users
-        Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
-        userRole.ifPresent(appUser::setRole);
+
         // we assign the registration code to the user
         UserRegistrationRequest request = UserRegistrationRequest.builder()
                 .user(appUser)
@@ -239,7 +244,7 @@ public class UserServiceImpl implements UserService {
         if (Objects.equals(request.get().getUser().getPhoneNumber(), validationRequest.getPhoneNumber()))
             return RecoveryResponse.builder()
                     .status("VALIDATED")
-                    .message("recover code is valid for phone number "+validationRequest.getPhoneNumber())
+                    .message("Recovery code is valid for phone number "+validationRequest.getPhoneNumber())
                     .build();
         else {
             return RecoveryResponse.builder()
@@ -266,6 +271,18 @@ public class UserServiceImpl implements UserService {
         return RecoveryResponse.builder()
                 .status("UPDATED_PASSWORD")
                 .message("Password has been updated , you may log in again with the new password !")
+                .build();
+    }
+
+    @Override
+    public WarningDismiss dismissWarning(UUID user_id) {
+        Optional<AppUser> appUser = userRepo.findById(user_id) ;
+        if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","User with associated phone number " +
+                "could not be found ,please try another number ! ") ;
+        appUser.get().setState(UserState.ACTIVE);
+        return WarningDismiss.builder()
+                .status("WARNING_DISMISSED")
+                .message("warning has been dismissed !")
                 .build();
     }
 
