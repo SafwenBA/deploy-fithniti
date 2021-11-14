@@ -6,6 +6,8 @@ import com.team.fithniti.demo.dto.response.AdminAction;
 import com.team.fithniti.demo.dto.response.AdminAuthResponse;
 import com.team.fithniti.demo.dto.response.AdminSuccessfulAuth;
 import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
+import com.twilio.http.Response;
+import org.springframework.http.ResponseEntity;
 
 import java.util.UUID;
 
@@ -13,6 +15,6 @@ import java.util.UUID;
 public interface AdminAPI {
     AdminAction ban(UUID user_id) ;
     AdminAction warn(UUID user_id) ;
-    AdminAuthResponse login(AuthenticationRequest request) ;
+    ResponseEntity<?> login(AuthenticationRequest request) ;
     RegistrationSuccessful registerAdmin(NewAdmin admin) ;
 }
