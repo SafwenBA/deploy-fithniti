@@ -13,6 +13,7 @@ import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.*;
+import com.team.fithniti.demo.service.FlickrService;
 import com.team.fithniti.demo.service.ImageService;
 import com.team.fithniti.demo.service.TwilioService;
 import com.team.fithniti.demo.service.UserService;
@@ -60,8 +61,7 @@ public class UserServiceImpl implements UserService {
     private final MyUserDetailsService myUserDetailsService;
     private final UserRecoveryRequestRepo userRecoveryRequestRepo ;
 
-    // TODO: 11/12/2021 uncomment this after merge with safwen
-    // private final FlickrService flickrService ;
+     private final FlickrService flickrService ;
 
     @Autowired
     private final AuthenticationManager authenticationManager;
@@ -131,8 +131,7 @@ public class UserServiceImpl implements UserService {
         appUser.setLastConnectedAs(UserType.Passenger);
         if(appUser.getPhotoUrl() == null || appUser.getPhotoUrl().equals("")){
             // set default logo
-            //todo - uncomment this when image service is active
-            //appUser.setPhotoUrl(flickrService.getDefaultLogo());
+            appUser.setPhotoUrl(flickrService.getDefaultLogo());
         }
         // assign the default user role to all new users
         Optional<Role> userRole = roleRepo.getRoleByName("USER") ;

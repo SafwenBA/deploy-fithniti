@@ -9,11 +9,14 @@ import com.team.fithniti.demo.dto.response.*;
 import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
+import com.team.fithniti.demo.model.Admin;
 import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.model.Role;
+import com.team.fithniti.demo.repository.AdminRepo;
 import com.team.fithniti.demo.repository.RoleRepo;
 import com.team.fithniti.demo.repository.UserRepo;
 import com.team.fithniti.demo.service.AdminService;
+import com.team.fithniti.demo.service.FlickrService;
 import com.team.fithniti.demo.service.TwilioService;
 import com.team.fithniti.demo.util.Constants;
 import com.team.fithniti.demo.util.UserState;
@@ -52,6 +55,10 @@ public class AdminServiceImpl implements AdminService {
     private final MyUserDetailsService myUserDetailsService;
     @Autowired
     private final TwilioService twilioService ;
+    @Autowired
+    private final FlickrService flickrService ;
+    @Autowired
+    private final AdminRepo adminRepo ;
 
     @Override
     public AdminAction ban(AppUser appUser) {
@@ -117,6 +124,7 @@ public class AdminServiceImpl implements AdminService {
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
         return new ResponseEntity<>(AdminSuccessfulAuth.builder()
+                .status("LOGGED_IN")
                 .adminId(userId)
                 .access_token(access_token)
                 .refreshToken(refresh_token)
@@ -135,15 +143,16 @@ public class AdminServiceImpl implements AdminService {
         if (exists)
             throw new ResourceExists("FOUND","Phone Number Exists Try another !") ;
         AppUser appUser = admin.convertToAppUser() ;
-        appUser.setLastConnectedAs(UserType.Passenger);
         if(appUser.getPhotoUrl() == null || appUser.getPhotoUrl().equals("")){
             // set default logo
-            //todo - uncomment this when image service is active
-            //appUser.setPhotoUrl(imageService.getDefaultLogo());
+            appUser.setPhotoUrl(flickrService.getDefaultLogo());
         }
         Optional<Role> userRole = roleRepo.getRoleByName("ADMIN") ;
         userRole.ifPresent(appUser::setRole);
         userRepo.save(appUser) ;
+        adminRepo.save(Admin.builder()
+                        .user(appUser)
+                .build()) ;
         return new RegistrationSuccessful(appUser,"Admin Account has been created Successfully ! ") ;
     }
 }
