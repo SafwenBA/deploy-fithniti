@@ -6,8 +6,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,4 +37,5 @@ public interface ImageApi {
     @ApiOperation(value = "Save default Logo",responseContainer = "void")
     @PostMapping("/default")
     void saveDefault(@RequestBody MultipartFile file);
+
 }

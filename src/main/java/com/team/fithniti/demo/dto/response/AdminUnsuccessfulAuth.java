@@ -1,14 +1,14 @@
 package com.team.fithniti.demo.dto.response;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 @Data
+@AllArgsConstructor
 public class AdminUnsuccessfulAuth extends AdminAuthResponse{
-    private String status ;
-    private String errorMessage ;
+    private String error ;
 
     public AdminUnsuccessfulAuth(String status, String errorMessage) {
-        this.status = status;
-        this.errorMessage = errorMessage;
+        this.error = errorMessage;
     }
 }
