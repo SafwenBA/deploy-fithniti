@@ -19,8 +19,11 @@ import com.team.fithniti.demo.util.Constants;
 import com.team.fithniti.demo.util.UserState;
 import com.team.fithniti.demo.util.UserType;
 import com.team.fithniti.demo.validator.UserValidation;
+import com.twilio.http.Response;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -85,17 +88,19 @@ public class AdminServiceImpl implements AdminService {
         }
 
     @Override
-    public AdminAuthResponse login(AuthenticationRequest request) {
+    public ResponseEntity<AdminAuthResponse> login(AuthenticationRequest request) {
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getPhoneNumber(), request.getPassword()));
         } catch (BadCredentialsException e){
-            return new AdminUnsuccessfulAuth("WRONG_CREDENTIALS","Please check your credentials ! ") ;
+            return new ResponseEntity<>(new AdminUnsuccessfulAuth("WRONG_CREDENTIALS","Please check your credentials ! "),
+                    HttpStatus.BAD_REQUEST) ;
         }
         final UserDetails userDetails = myUserDetailsService.loadUserByUsername(request.getPhoneNumber());
         AppUser appuser = userRepo.findByPhoneNumber(userDetails.getUsername()).get() ;
         String role = appuser.getRole().getName() ;
         if (Objects.equals(role, "USER"))
-            return new AdminUnsuccessfulAuth("WRONG_CREDENTIALS","Please check your credentials ! ") ;
+            return new ResponseEntity<>(new AdminUnsuccessfulAuth("WRONG_CREDENTIALS","Please check your credentials ! "),
+                HttpStatus.BAD_REQUEST) ;
         String userLogo = appuser.getPhotoUrl() ;
         UUID userId = appuser.getId();
         Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8)) ;
@@ -111,14 +116,14 @@ public class AdminServiceImpl implements AdminService {
                 .withSubject(userDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
-        return AdminSuccessfulAuth.builder()
+        return new ResponseEntity<>(AdminSuccessfulAuth.builder()
                 .adminId(userId)
                 .access_token(access_token)
                 .refreshToken(refresh_token)
                 .photoUrl(userLogo)
                 .tokenExpirationDate(expiryDate)
                 .role(role)
-                .build();
+                .build(),HttpStatus.OK);
     }
 
     @Override

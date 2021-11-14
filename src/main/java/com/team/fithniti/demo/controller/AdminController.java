@@ -10,6 +10,7 @@ import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
 import com.team.fithniti.demo.repository.UserRepo;
 import com.team.fithniti.demo.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class AdminController implements AdminAPI {
 
     @Override
     @PostMapping("/login")
-    public AdminAuthResponse login(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<AdminAuthResponse> login(@RequestBody AuthenticationRequest request) {
      return adminService.login(request) ;
     }
 

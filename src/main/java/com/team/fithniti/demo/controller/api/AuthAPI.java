@@ -17,10 +17,10 @@ import java.util.UUID;
 public interface AuthAPI {
 
     RegistrationSuccessful create(NewUser user) ;
-    AuthenticationResponse login(AuthenticationRequest request) throws Exception;
+    ResponseEntity<AuthenticationResponse> login(AuthenticationRequest request) throws Exception;
     RecoveryResponse requestPasswordRecovery(RecoveryRequest request);
-    RecoveryResponse validateRecoveryCode( RecoveryValidationRequest request);
-    VerificationResponse verifyAccount(UUID user_id, String verificationCode) ;
+    ResponseEntity<RecoveryResponse> validateRecoveryCode( RecoveryValidationRequest request);
+    ResponseEntity<VerificationResponse> verifyAccount(UUID user_id, String verificationCode) ;
     RecoveryResponse updateForgottenPassword( UpdatePasswordRequest request);
     RecoveryResponse resendRecoveryPassword(RecoveryRequest request) ;
 

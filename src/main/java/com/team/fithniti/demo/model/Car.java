@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Car extends Auditable{
+public class Car {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String brand;
@@ -21,4 +21,10 @@ public class Car extends Auditable{
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CarModel> carModels ;
+
+    public Car(String brand, String logoURL, List<CarModel> carModels) {
+        this.brand = brand;
+        this.logoURL = logoURL;
+        this.carModels = carModels;
+    }
 }
