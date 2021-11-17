@@ -25,7 +25,7 @@ public class UserController implements UserAPI {
     @Override
     public void dismissWarning(UUID user_id) {
         Optional<AppUser> appUser = userRepo.findById(user_id) ;
-        if (appUser.isEmpty())
+        if (!appUser.isPresent())
             throw new ResourceNotFound("400","could not find user with given id !") ;
         if (appUser.get().getState().equals(UserState.WARNED))
             appUser.get().setState(UserState.ACTIVE);

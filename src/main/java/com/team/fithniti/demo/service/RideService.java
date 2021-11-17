@@ -15,6 +15,7 @@ public interface RideService {
 
     RideDTO create(NewRide ride); // NewRide, included driverId + dataValidation
     RideDTO findById(Long id);
+    Ride findEntityById(Long id);
     Page<RideDTO> findAll(RideFilterOption options);// Filter: Query DSL
     Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options);// Filter: Query DSL
     void deleteById(Long rideId);

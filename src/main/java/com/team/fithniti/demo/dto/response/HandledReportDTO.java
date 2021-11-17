@@ -28,7 +28,7 @@ public class HandledReportDTO {
                 .id(handledReport.getId())
                 .reason(handledReport.getReason())
                 .action(handledReport.getAction())
-                .admin(handledReport.getAdmin())
+//                .admin(handledReport.getAdmin())
                 .rideReport(handledReport.getRideReport())
                 .build();
     }

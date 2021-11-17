@@ -54,7 +54,7 @@ public class ReportServiceImpl implements ReportService {
     public ReportSubmitted createRideReport(NewReport newReport) {
         Optional<Ride> ride = rideRepo.findById(newReport.getRideId());
         //check if those nibbas exist
-        if(ride.isEmpty()) throw new ResourceNotFound("ride not found");//TODO: verify this bitch later
+        if(!ride.isPresent()) throw new ResourceNotFound("ride not found");//TODO: verify this bitch later
         if(!userRepo.existsById(newReport.getReportedId())) throw new ResourceNotFound("reported not found");
         if(!userRepo.existsById(newReport.getReporterId())) throw new ResourceNotFound("reporter not found");
         //check if they belong to the same ride
