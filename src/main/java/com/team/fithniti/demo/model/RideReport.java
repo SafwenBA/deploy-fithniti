@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.model;
 
+import com.team.fithniti.demo.util.ReportStatus;
 import com.team.fithniti.demo.util.ReportedBy;
 import lombok.*;
 
@@ -20,7 +21,6 @@ public class RideReport extends Auditable{
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private ReportedBy reportedBy;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
@@ -33,5 +33,10 @@ public class RideReport extends Auditable{
     private Ride ride;
 
     @OneToOne
-    private Passenger passenger;
+    private AppUser reporter;
+
+    @OneToOne
+    private AppUser reported;
+
+    private ReportStatus reportStatus;
 }
