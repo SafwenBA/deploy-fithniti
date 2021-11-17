@@ -8,26 +8,13 @@ import org.springframework.data.domain.Page;
 
 import java.util.Map;
 
-/**
- * Start with Simple CRUD
- */
 public interface RideService {
 
-    RideDTO create(NewRide ride); // NewRide, included driverId + dataValidation
+    RideDTO create(NewRide ride);
     RideDTO findById(Long id);
     Ride findEntityById(Long id);
-    Page<RideDTO> findAll(RideFilterOption options);// Filter: Query DSL
-    Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options);// Filter: Query DSL
+    Page<RideDTO> findAll(RideFilterOption options);
+    Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options);
     void deleteById(Long rideId);
-    void update(Long rideId,Long driverId, Map<String,Object> changes);// update : state ...
-
-//    void rate(PassengerReview); ? may be in another service
-
-//    Request Service ---> into new Service
-//    void joinRide(Long rideID, Long passengerID);
-//    void acceptRequest(Long rideID);
-//    void rejectRequest(Long rideID);
-//    void cancelRequest(Long rideID, Long passengerID);
-//
-
+    void update(Long rideId, Map<String,Object> changes);
 }

@@ -77,13 +77,14 @@ public class RideRequestServiceImpl implements RideRequestService {
     public void handle(Long reqId, RideRequestState state) {
         RideRequest rideRequest = rideRequestRepo.findById(reqId).orElseThrow(
                 () -> new ResourceNotFound("RIDE_REQUEST_FAILED", "No request found"));
+//        checkUserAccess
         rideRequest.setState(state);
-        // TODO: Generate notification to passenger
         rideRequestRepo.save(rideRequest);
+        // TODO: Generate notification to passenger
         if (state.equals(RideRequestState.ACCEPTED)){
-            HashMap<String, Byte> updates = new HashMap<>();
-            updates.put("Available Places", null);
-//            rideService.update(rideRequest.getRide().getId(),null,updates);
+            HashMap<String, Object> updates = new HashMap<>();
+            updates.put("availablePlaces", (byte) 1);
+            rideService.update(rideRequest.getRide().getId(),updates);
         }
     }
 

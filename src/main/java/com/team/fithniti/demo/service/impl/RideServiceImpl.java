@@ -125,7 +125,7 @@ public class RideServiceImpl implements RideService{
     }
 
     @Override
-    public void update(Long rideId, Long driverId, Map<String, Object> changes) {
+    public void update(Long rideId, Map<String, Object> changes) {
         try {
             final Ride ride = findEntityById(rideId);
             changes.forEach((k, v) -> {

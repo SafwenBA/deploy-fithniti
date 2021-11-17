@@ -8,7 +8,7 @@ import org.springframework.data.domain.Page;
 public interface RideRequestService {
     Object create(Long passengerId, Long rideId );
     void cancel(Long passengerId, Long rideId );
-    void handle(Long reqId , RideRequestState state);// ans = accept/reject
-    Page<RideRequestDTO> getRideRequests(Long rideId, RideRequestFilterOption options);// + filter: state = done, any
-    Page<RideRequestDTO> getPassengerRequests(Long passengerId,  RideRequestFilterOption options);//History for passenger requests
+    void handle(Long reqId , RideRequestState state);
+    Page<RideRequestDTO> getRideRequests(Long rideId, RideRequestFilterOption options);
+    Page<RideRequestDTO> getPassengerRequests(Long passengerId,  RideRequestFilterOption options);
 }
