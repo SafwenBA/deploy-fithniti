@@ -6,7 +6,7 @@ import com.team.fithniti.demo.util.RideRequestState;
 import org.springframework.data.domain.Page;
 
 public interface RideRequestService {
-    Object create(Long passengerId, Long rideId );
+    RideRequestDTO create(Long passengerId, Long rideId );
     void cancel(Long passengerId, Long rideId );
     void handle(Long reqId , RideRequestState state);
     Page<RideRequestDTO> getRideRequests(Long rideId, RideRequestFilterOption options);

@@ -16,5 +16,5 @@ public interface RideService {
     Page<RideDTO> findAll(RideFilterOption options);
     Page<RideDTO> findDriverRides(Long driverId, RideFilterOption options);
     void deleteById(Long rideId);
-    void update(Long rideId, Map<String,Object> changes);
+    RideDTO update(Long rideId, Map<String,Object> changes);
 }

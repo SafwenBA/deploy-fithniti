@@ -41,7 +41,7 @@ public class RideRequestServiceImpl implements RideRequestService {
     private PassengerRepo passengerRepo; // <-- to Delete
 
     @Override
-    public Object create(Long passengerId, Long rideId) {
+    public RideRequestDTO create(Long passengerId, Long rideId) {
         // check AuthUser access
         Passenger passenger = new Passenger();//Todo: replace with passengerService.findById(id)
         Ride ride = rideService.findEntityById(rideId);
@@ -53,7 +53,7 @@ public class RideRequestServiceImpl implements RideRequestService {
                 .passenger(passenger)
                 .state(RideRequestState.PENDING)
                 .build();
-        return rideRequestRepo.save(rideRequest);
+        return RideRequestDTO.fromEntity(rideRequestRepo.save(rideRequest));
         // TODO: notification to driver
     }
 

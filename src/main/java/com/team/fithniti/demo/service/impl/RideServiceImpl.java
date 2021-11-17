@@ -125,7 +125,7 @@ public class RideServiceImpl implements RideService{
     }
 
     @Override
-    public void update(Long rideId, Map<String, Object> changes) {
+    public RideDTO update(Long rideId, Map<String, Object> changes) {
         try {
             final Ride ride = findEntityById(rideId);
             changes.forEach((k, v) -> {
@@ -153,14 +153,14 @@ public class RideServiceImpl implements RideService{
                         if (availablePlaces == ride.getMaxPlaces()){
                             throw new InvalidResource("Max limit exceeded","Failed to update availablePlaces");
                         }
-                        availablePlaces++;
-                        ride.setAvailablePlaces(availablePlaces);
+                        ride.setAvailablePlaces(++availablePlaces);
                         rideRepo.save(ride);
                         break;
                     }
                     // TODO: carry on
                 }
             });
+            return RideDTO.fromEntity(ride);
         }catch (Exception e){
             throw new  InvalidResource("FAILED_TO_UPDATE_RIDE",e.getMessage());
         }
