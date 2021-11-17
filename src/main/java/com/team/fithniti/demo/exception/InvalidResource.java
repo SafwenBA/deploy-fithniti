@@ -14,8 +14,4 @@ public class InvalidResource extends RuntimeException{
         this.errors = errors;
         this.errorCode = errorCode;
     }
-    public InvalidResource(String errorCode, String msg) {
-        super(msg);
-        this.errorCode = errorCode;
-    }
 }

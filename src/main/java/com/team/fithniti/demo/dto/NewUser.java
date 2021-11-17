@@ -24,17 +24,19 @@ public class NewUser {
     private String lastName;
     private String address;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+    @Temporal(TemporalType.DATE)
     private LocalDate birthDate;
-    private String encodedLogo ;
+    private String photoUrl ;
 
 
     public AppUser convertToAppUser(){
+        System.out.println("LOADED PHOTO URL = "+getPhotoUrl()+" ..... !");
         return AppUser.builder()
                 .firstName(this.getFirstName())
                 .lastName(this.getLastName())
                 .phoneNumber(this.getPhoneNumber())
                 .password(new BCryptPasswordEncoder().encode(this.getPassword()))
-                .encodedLogo(this.getEncodedLogo())
+                .photoUrl(this.getPhotoUrl())
                 .address(this.getAddress())
                 .birthDate(this.getBirthDate())
                 .build() ;

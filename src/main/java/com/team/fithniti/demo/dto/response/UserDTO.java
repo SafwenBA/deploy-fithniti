@@ -19,10 +19,14 @@ public class UserDTO {
     private String firstName;
     private String lastName;
     private UserState state;
+
     private String phoneNumber;
     private String address;
     private LocalDate birthDate;
     private String photoURL;
+
+    private DriverDto driver;
+    private PassengerDto passenger;
 
     public static UserDTO fromEntity(AppUser user,DriverDto driver, PassengerDto passenger){
         if(user == null)
@@ -35,7 +39,9 @@ public class UserDTO {
                 .birthDate(user.getBirthDate())
                 .phoneNumber(user.getPhoneNumber()) //add field to show/hide private data like address or phone
                 .state(user.getState())
-                .photoURL(user.getPhotoURL())
+                .photoURL(user.getPhotoUrl())
+                .driver(driver)
+                .passenger(passenger)
                 .build();
     }
 }

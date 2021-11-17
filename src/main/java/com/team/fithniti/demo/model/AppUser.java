@@ -8,13 +8,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import javax.persistence.*;
-import java.time.LocalDate;
-import java.util.UUID;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.persistence.*;
+import java.time.LocalDate;
 import java.util.*;
 
 @Entity
@@ -27,6 +26,7 @@ public class AppUser extends Auditable implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+
     private String phoneNumber;
     private String password;
     private String firstName;
@@ -35,9 +35,10 @@ public class AppUser extends Auditable implements UserDetails {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
     private UserState state;
-    private String photoURL;
+    private String photoUrl ;
     private boolean confirmed  ;
-    private UserType lastConnectedAs;
+    private UserType lastConnectedAs ;
+    private int alertsCount ;
 
     @OneToOne
     @JoinColumn(name = "role_id") // default: entity_id --> No need for joinColumn except for specifying != name
@@ -73,12 +74,12 @@ public class AppUser extends Auditable implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return false;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return state==UserState.ACTIVE;
+        return true;
     }
 
 }

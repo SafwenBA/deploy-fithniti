@@ -1,14 +1,10 @@
 package com.team.fithniti.demo;
 
-import com.team.fithniti.demo.dto.request.NewRide;
-import com.team.fithniti.demo.dto.response.RideDTO;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.DriverRepo;
 import com.team.fithniti.demo.repository.PassengerRepo;
 import com.team.fithniti.demo.repository.RideRepo;
 import com.team.fithniti.demo.repository.RoleRepo;
-import com.team.fithniti.demo.service.RideService;
-import com.team.fithniti.demo.util.RideType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -28,7 +24,13 @@ public class DemoApplication implements CommandLineRunner {
     private RoleRepo roleRepo;
 
     @Autowired
-    private RideService rideService;
+    private RideRepo rideRepo;
+
+    @Autowired
+    private DriverRepo driverRepo;
+
+    @Autowired
+    private PassengerRepo passengerRepo;
 
     @Bean
     public BCryptPasswordEncoder passwordEncoder(){
@@ -51,12 +53,6 @@ public class DemoApplication implements CommandLineRunner {
             roleRepo.save(superAdmin);
         }
 
-//        RideDTO r1 = rideService.create(NewRide.builder().rideType(RideType.COMFORTABLE)
-//                .maxPlaces((byte) 4)
-//                .description("desc****")
-//                .price(8.5F)
-//                .idDriver(?) // complete rest...
-//                .build());
 
     }
 }

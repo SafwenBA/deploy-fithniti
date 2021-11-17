@@ -13,6 +13,7 @@ import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.*;
+import com.team.fithniti.demo.service.FlickrService;
 import com.team.fithniti.demo.service.ImageService;
 import com.team.fithniti.demo.service.TwilioService;
 import com.team.fithniti.demo.service.UserService;
@@ -23,6 +24,8 @@ import com.team.fithniti.demo.util.UserType;
 import  com.team.fithniti.demo.validator.UserValidation;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -57,7 +60,8 @@ public class UserServiceImpl implements UserService {
     private final TwilioService twilioService ;
     private final MyUserDetailsService myUserDetailsService;
     private final UserRecoveryRequestRepo userRecoveryRequestRepo ;
-    private final ImageService imageService ;
+
+     private final FlickrService flickrService ;
 
     @Autowired
     private final AuthenticationManager authenticationManager;
@@ -67,21 +71,27 @@ public class UserServiceImpl implements UserService {
         return userRepo.findAll();
     }
 
-    //todo - check user state {BAN or PERMA_BAN}
     @Override
-    public AuthenticationResponse login(AuthenticationRequest request ) {
+    public ResponseEntity<AuthenticationResponse> login(AuthenticationRequest request ) {
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getPhoneNumber(),request.getPassword()));
         } catch (BadCredentialsException e){
-            return new InvalidAuthentication("INVALID_CREDENTIALS","Incorrect Credentials ! ") ;
+            return new ResponseEntity<>(new InvalidAuthentication("INVALID_CREDENTIALS","Incorrect Credentials ! "),
+                    HttpStatus.BAD_REQUEST) ;
         }
         final UserDetails userDetails = myUserDetailsService.loadUserByUsername(request.getPhoneNumber());
         AppUser appuser = userRepo.findByPhoneNumber(userDetails.getUsername()).get() ;
         // if the user account is not confirmed
         if (!appuser.isConfirmed())
-            return  new UnconfirmedAuthentication("NOT_CONFIRMED",appuser.getId(),"Please Confirm Your Account ! ")  ;
+            return  new ResponseEntity<>(new UnconfirmedAuthentication("NOT_CONFIRMED",appuser.getId(),"Please Confirm Your Account ! "),
+                    HttpStatus.BAD_REQUEST)  ;
+        if (appuser.getState() == UserState.PERM_BANNED) {
+            return new ResponseEntity<>(new InvalidAuthentication("PERMA_BAN","Your account has been banned permanently for violating our code of conduct !"),
+                    HttpStatus.BAD_REQUEST) ;
+        }
         UUID userId = appuser.getId();
-        String userLogo = appuser.getEncodedLogo();
+        String userLogo = appuser.getPhotoUrl();
+        String role = appuser.getRole().getName() ;
         Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8)) ;
         Date expiryDate = new Date(System.currentTimeMillis()+ 10000*60*1000) ; // set this back to 10 mins lul , users will die before their token expires :v
         String access_token = JWT.create()
@@ -94,7 +104,8 @@ public class UserServiceImpl implements UserService {
                 .withSubject(userDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
-        return new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate,appuser.getLastConnectedAs());
+        return new ResponseEntity<>(new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate,appuser.getState(),appuser.getLastConnectedAs(),role),
+                HttpStatus.OK);
     }
 
     @Override
@@ -116,11 +127,11 @@ public class UserServiceImpl implements UserService {
         AppUser appUser = user.convertToAppUser() ;
         appUser.setState(UserState.ACTIVE);
         appUser.setConfirmed(false);
+        appUser.setAlertsCount(0);
         appUser.setLastConnectedAs(UserType.Passenger);
-        if(appUser.getEncodedLogo() == null || appUser.getEncodedLogo().equals("")){
+        if(appUser.getPhotoUrl() == null || appUser.getPhotoUrl().equals("")){
             // set default logo
-            //todo - uncomment this when image service is active
-            //appUser.setEncodedLogo(imageService.getDefaultBase64());
+            appUser.setPhotoUrl(flickrService.getDefaultLogo());
         }
         // assign the default user role to all new users
         Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
@@ -148,7 +159,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public VerificationResponse verifyAccount(UUID user_id , String verificationCode) {
+    public ResponseEntity<VerificationResponse> verifyAccount(UUID user_id , String verificationCode) {
         Optional<UserRegistrationRequest> registrationRequest = userRegistrationRequestRepo.findByUserId(user_id) ;
         if (registrationRequest.isEmpty()) throw new ResourceNotFound("NOT_FOUND","Request was not found !") ;
         UserRegistrationRequest request = registrationRequest.get() ;
@@ -157,20 +168,20 @@ public class UserServiceImpl implements UserService {
             request.getUser().setConfirmed(true);
             userRegistrationRequestRepo.delete(request);
             //request.setRequestState(RequestState.DONE); // we could set the request state to done or delete it
-            return VerificationResponse.builder()
-                            .verificationState("VERIFIED")
+            return new ResponseEntity<>(VerificationResponse.builder()
+                    .verificationState("VERIFIED")
                     .message("Account Has Been Verified Successfully , please log in !")
-                    .build();
+                    .build(),HttpStatus.OK);
         }else{
             // incorrect code and has attempts left
             if (request.getAttemptsNumber()<2) {
                 request.setAttemptsNumber(request.getAttemptsNumber()+1);
-                return VerificationResponse.builder()
+                return new ResponseEntity<>(VerificationResponse.builder()
                         .verificationState("FAILED")
                         .message(
                                 String.format("Verification code is incorrect , you have %s attempts left " +
                                         "before another code is issued !",(3-request.getAttemptsNumber())))
-                        .build();
+                        .build(),HttpStatus.BAD_REQUEST);
             }
             else {
                 // incorrect code and has no attempts left -> issue a new code
@@ -189,10 +200,10 @@ public class UserServiceImpl implements UserService {
                         .message("Your <fiThniti> Account Verification Code is "
                                 +newRequest.getVerificationCode())
                         .build());
-                return VerificationResponse.builder()
+                return new ResponseEntity<>(VerificationResponse.builder()
                         .verificationState("FAILED")
                         .message("Verification code is incorrect , a new code has been issued , please check your phone !")
-                        .build();
+                        .build(),HttpStatus.BAD_REQUEST);
             }
 
         }
@@ -231,20 +242,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RecoveryResponse validateRecoveryCode(RecoveryValidationRequest validationRequest) {
+    public ResponseEntity<RecoveryResponse> validateRecoveryCode(RecoveryValidationRequest validationRequest) {
         Optional<UserRecoveryRequest> request = userRecoveryRequestRepo.findByRecoveryCode(validationRequest.getRecoveryCode()) ;
-        if (request.isEmpty()) throw new ResourceNotFound("NOT-FOUND","No Recovery Request has " +
+        if (request.isEmpty()) throw new ResourceNotFound("NOT_FOUND","No Recovery Request has " +
                 "been found associated with the given code !") ;
         if (Objects.equals(request.get().getUser().getPhoneNumber(), validationRequest.getPhoneNumber()))
-            return RecoveryResponse.builder()
+            return new ResponseEntity<>(RecoveryResponse.builder()
                     .status("VALIDATED")
                     .message("Recovery code is valid for phone number "+validationRequest.getPhoneNumber())
-                    .build();
+                    .build(),HttpStatus.OK);
         else {
-            return RecoveryResponse.builder()
+            return new ResponseEntity<>(RecoveryResponse.builder()
                     .status("NOT_VALIDATED")
                     .message("Invalid Recovery Code !")
-                    .build();
+                    .build(),HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -265,6 +276,18 @@ public class UserServiceImpl implements UserService {
         return RecoveryResponse.builder()
                 .status("UPDATED_PASSWORD")
                 .message("Password has been updated , you may log in again with the new password !")
+                .build();
+    }
+
+    @Override
+    public WarningDismiss dismissWarning(UUID user_id) {
+        Optional<AppUser> appUser = userRepo.findById(user_id) ;
+        if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","User with associated phone number " +
+                "could not be found ,please try another number ! ") ;
+        appUser.get().setState(UserState.ACTIVE);
+        return WarningDismiss.builder()
+                .status("WARNING_DISMISSED")
+                .message("warning has been dismissed !")
                 .build();
     }
 

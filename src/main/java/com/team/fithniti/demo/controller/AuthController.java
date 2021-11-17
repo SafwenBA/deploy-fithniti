@@ -9,6 +9,7 @@ import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
 import com.team.fithniti.demo.dto.response.VerificationResponse;
 import com.team.fithniti.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -34,7 +35,7 @@ public class AuthController implements AuthAPI {
 
     @Override
     @PostMapping("/verify")
-    public VerificationResponse verifyAccount(@RequestParam UUID user_id, @RequestParam String verificationCode) {
+    public ResponseEntity<VerificationResponse> verifyAccount(@RequestParam UUID user_id, @RequestParam String verificationCode) {
         return userService.verifyAccount(user_id,verificationCode) ;
     }
 
@@ -47,7 +48,7 @@ public class AuthController implements AuthAPI {
 
     @Override
     @PostMapping("/login")
-    public AuthenticationResponse login(@RequestBody AuthenticationRequest request) {
+    public ResponseEntity<AuthenticationResponse> login(@RequestBody AuthenticationRequest request) {
         return userService.login(request) ;
     }
 
@@ -60,7 +61,7 @@ public class AuthController implements AuthAPI {
 
     @Override
     @PostMapping("/recovery")
-    public RecoveryResponse validateRecoveryCode(@RequestBody RecoveryValidationRequest request) {
+    public ResponseEntity<RecoveryResponse> validateRecoveryCode(@RequestBody RecoveryValidationRequest request) {
         return userService.validateRecoveryCode(request);
     }
 

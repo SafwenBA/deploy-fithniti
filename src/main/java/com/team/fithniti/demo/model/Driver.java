@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import javax.persistence.*;
 import java.util.List;
@@ -28,6 +29,8 @@ public class Driver {
 
     @OneToOne
     private AppUser user;
+
+    private int reportsCount ;
 
     public Driver(AppUser user) {
         this.user = user;
