@@ -16,7 +16,8 @@ import java.util.List;
 public class CountryState {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "mySeqGen", sequenceName = "countryStatesSeq", initialValue = 25)
+    @GeneratedValue(generator = "mySeqGen")
     private Long id;
 
     @Column(name = "name")

@@ -13,7 +13,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class CarModel extends Auditable{
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "myCarModelSeqGen", sequenceName = "carModelSeq", initialValue = 3549)
+    @GeneratedValue(generator = "myCarModelSeqGen")
     private Long id;
 
     @Column(name = "model", unique = true, nullable = false)

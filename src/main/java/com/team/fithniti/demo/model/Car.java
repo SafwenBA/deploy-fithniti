@@ -15,7 +15,8 @@ import java.util.List;
 @Entity
 public class Car extends Auditable {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "mySeqGen", sequenceName = "carsSeq", initialValue = 60)
+    @GeneratedValue(generator = "mySeqGen")
     private Long id;
 
     public Car(String brand, String logoURL, List<CarModel> carModels) {
