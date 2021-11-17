@@ -1,24 +1,31 @@
 package com.team.fithniti.demo.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.List;
 
-@Entity
 @Table(name = "countries")
-@Data
+@Setter
+@Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
+@Entity
 public class Country {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(name = "mySeqGen", sequenceName = "countriesSeq", initialValue = 2)
+    @GeneratedValue(generator = "mySeqGen")
     private Long id;
+
+    @Column(name = "name", unique = true)
     private String name;
+
+    @Column(name = "flagImageURL")
     private String flagImageURL;
 
-    @OneToMany(mappedBy = "country", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<Governorate> governorates;
+    @OneToMany(targetEntity = CountryState.class, mappedBy = "country", cascade = CascadeType.ALL, fetch = FetchType.LAZY,orphanRemoval = true)
+    @JsonIgnore
+    List<CountryState> countryStates;
 }
