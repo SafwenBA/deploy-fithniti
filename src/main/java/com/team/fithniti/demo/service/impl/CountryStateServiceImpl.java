@@ -4,7 +4,6 @@ import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.Country;
-import com.team.fithniti.demo.model.CountryState;
 import com.team.fithniti.demo.repository.CountryStateRepo;
 import com.team.fithniti.demo.service.CountryService;
 import com.team.fithniti.demo.service.CountryStateService;

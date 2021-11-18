@@ -1,7 +1,5 @@
 package com.team.fithniti.demo.service;
 
-import com.team.fithniti.demo.model.CountryState;
-
 import java.util.List;
 
 public interface CountryStateService {
