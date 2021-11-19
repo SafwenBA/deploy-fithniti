@@ -23,7 +23,6 @@ public class AuthController implements AuthAPI {
 
     @Autowired
     private UserService userService ;
-    private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
 
     @Override
