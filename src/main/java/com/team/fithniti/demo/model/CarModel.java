@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class CarModel extends Auditable{
+public class CarModel {
     @Id
     @SequenceGenerator(name = "myCarModelSeqGen", sequenceName = "carModelSeq", initialValue = 3549)
     @GeneratedValue(generator = "myCarModelSeqGen")

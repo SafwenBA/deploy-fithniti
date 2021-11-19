@@ -1,7 +1,9 @@
 package com.team.fithniti.demo.controller;
 
+import com.team.fithniti.demo.dto.request.NewUser;
 import com.team.fithniti.demo.model.Car;
 import com.team.fithniti.demo.service.CarService;
+import com.team.fithniti.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "http://localhost:8081")
+
 @RestController
 @RequestMapping("/api/v2")
 public class CarController {

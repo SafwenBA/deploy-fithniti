@@ -8,14 +8,14 @@ public class RidePathway {
     @OneToOne
     private Country fromCountry;
     @OneToOne
-    private Governorate fromGovernorate;
+    private CountryState fromGovernorate;
     @OneToOne
     private City fromCity;
 
     @OneToOne
     private Country toCountry;
     @OneToOne
-    private Governorate toGovernorate;
+    private CountryState toGovernorate;
     @OneToOne
     private City toCity;
 }

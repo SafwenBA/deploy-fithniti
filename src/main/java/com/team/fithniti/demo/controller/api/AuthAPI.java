@@ -5,6 +5,7 @@ import com.team.fithniti.demo.dto.response.RecoveryResponse;
 import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
 import com.team.fithniti.demo.dto.response.VerificationResponse;
 import com.team.fithniti.demo.dto.response.AuthenticationResponse;
+import io.swagger.annotations.Api;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,7 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.UUID;
-
+@Api
 public interface AuthAPI {
 
     RegistrationSuccessful create(NewUser user) ;

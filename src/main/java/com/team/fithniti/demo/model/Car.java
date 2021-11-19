@@ -13,7 +13,7 @@ import java.util.List;
 @NoArgsConstructor
 @ToString
 @Entity
-public class Car extends Auditable {
+public class Car {
     @Id
     @SequenceGenerator(name = "mySeqGen", sequenceName = "carsSeq", initialValue = 60)
     @GeneratedValue(generator = "mySeqGen")

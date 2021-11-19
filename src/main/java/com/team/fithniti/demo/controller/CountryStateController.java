@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.controller;
 
+import com.team.fithniti.demo.model.CountryState;
 import com.team.fithniti.demo.service.CountryStateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
