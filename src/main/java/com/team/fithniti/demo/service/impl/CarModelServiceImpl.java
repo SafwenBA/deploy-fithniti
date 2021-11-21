@@ -92,4 +92,9 @@ public class CarModelServiceImpl implements CarModelService {
         }
         return carModelFound.get(0);
     }
+
+    @Override
+    public CarModel findCarModelByCarBrandAndModel(String brand, String model) {
+        return carModelRepo.findCarModelByCarBrandAndModel(brand,model).orElseThrow(() -> new ResourceNotFound("INVALID_CAR_MODEL","No CarModel found"));
+    }
 }

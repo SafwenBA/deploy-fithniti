@@ -49,5 +49,9 @@ public class CarModelController {
         carModelService.delete(carModelId, brand);
         return new ResponseEntity<>("Car model deleted", HttpStatus.OK);
     }
+    @GetMapping("/car-models/by-brand")
+    CarModel findCarModelByCarBrandAndModel(@RequestParam String brand,@RequestParam String model){
+        return carModelService.findCarModelByCarBrandAndModel(brand,model);
+    }
 
 }
