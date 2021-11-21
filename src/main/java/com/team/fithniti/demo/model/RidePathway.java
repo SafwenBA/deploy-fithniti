@@ -1,9 +1,12 @@
 package com.team.fithniti.demo.model;
 
+import lombok.Data;
+
 import javax.persistence.Embeddable;
 import javax.persistence.OneToOne;
 
 @Embeddable
+@Data
 public class RidePathway {
     @OneToOne
     private Country fromCountry;
