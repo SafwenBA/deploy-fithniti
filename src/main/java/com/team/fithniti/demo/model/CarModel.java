@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,6 +26,7 @@ public class CarModel {
 
     @ManyToOne
     @JoinColumn(name="car_id", referencedColumnName = "id")
+    @JsonIgnore
     private Car car;
 
     public CarModel(String model, String imageURL, Car car) {
