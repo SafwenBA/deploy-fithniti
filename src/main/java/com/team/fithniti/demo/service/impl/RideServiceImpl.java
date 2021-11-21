@@ -7,6 +7,8 @@ import com.team.fithniti.demo.dto.response.RideDTO;
 import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.*;
+import com.team.fithniti.demo.repository.CityRepo;
+import com.team.fithniti.demo.repository.DriverRepo;
 import com.team.fithniti.demo.repository.RideRepo;
 import com.team.fithniti.demo.service.CarModelService;
 import com.team.fithniti.demo.service.RideService;
@@ -22,6 +24,7 @@ import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +34,8 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class RideServiceImpl implements RideService{
+    @Autowired
+    private DriverRepo driverRepo;
     @Autowired
     private RideRepo rideRepo;
 
@@ -42,22 +47,28 @@ public class RideServiceImpl implements RideService{
         if ( ride == null )
             throw new InvalidResource(null,"INVALID_RIDE","Can't persist null entity");
         if ( ! carModelService.existsCarModelByCarBrandAndModel(ride.getCar().getBrand(),ride.getCar().getCarModel())) {
-            throw new InvalidResource("Failed to create Ride, Invalid Car");
+            throw new InvalidResource("Failed to create Ride, Invalid Car Info");
         }
-        Driver driver = new Driver(); // driverService.findById(ride.GetIdDriver) + check access
-        return RideDTO.fromEntity(
-                rideRepo.save( Ride.builder()
+        CarModel carModel = carModelService.findCarModelByCarBrandAndModel(ride.getCar().getBrand(), ride.getCar().getCarModel());
+        Driver driver = driverRepo.findById(ride.getIdDriver()).orElseThrow(() -> new InvalidResource("No Driver found !")); // driverService.findById(ride.GetIdDriver) + check access
+        RidePathway pathway = ride.getPathway();
+        // TODO: 11/21/21 validate pathway
+        Ride save = rideRepo.save(Ride.builder()
                         .description(ride.getDescription())
+                        .car(carModel.getCar())
+                        .carModel(carModel)
+                        .rideState(RideState.PENDING)
                         .startTime(ride.getStartTime())
                         .maxPlaces(ride.getMaxPlaces())
                         .availablePlaces(ride.getMaxPlaces())
                         .pathway(ride.getPathway())
                         .price(ride.getPrice())
                         .rideType(ride.getRideType())
-                        .tags(ride.getTags())
+//                        .tags(ride.getTags())
+                        // TODO: 11/21/21 add tags
                         .driver(driver)
-                        .build()
-        ));
+                        .build());
+        return RideDTO.fromEntity(save);
     }
 
     @Override
@@ -88,34 +99,50 @@ public class RideServiceImpl implements RideService{
     }
 
     private Page<RideDTO> doYourJob(QRide qRide, BooleanBuilder builder, RideFilterOption options) {
+        int page = 0, limit = 10;
         if ( options == null ){
             builder.and(qRide.startTime.after(LocalTime.now().plusMinutes(15))).and(qRide.rideState.eq(RideState.PENDING));
+            return rideRepo.findAll(builder,PageRequest.of(page, limit,Sort.by(Sort.Direction.DESC, "CreatedDate","id")))
+                    .map(RideDTO::fromEntity);
         }
         else {
+            page = (options.getPage() != null) ? options.getPage() : page;
+            limit = (options.getLimit() != null) ? options.getLimit() : limit;
             if ( options.getMaxPlaces() != null ) builder.and(qRide.maxPlaces.eq(options.getMaxPlaces()));
             if ( options.getAvailablePlaces() != null ) builder.and(qRide.availablePlaces.eq(options.getAvailablePlaces()));
             if ( options.getCarBrand() != null ) builder.and(qRide.car.brand.equalsIgnoreCase(options.getCarBrand()));
             if ( options.getCarModel() != null ) builder.and(qRide.carModel.model.equalsIgnoreCase(options.getCarModel()));
             if ( options.getRideState() != null ) builder.and(qRide.rideState.eq(options.getRideState()));
             if ( options.getRideType() != null ) builder.and(qRide.rideType.eq(options.getRideType()));
-            if ( options.getMaxPrice() > options.getMinPrice() ) builder.and(qRide.price.between(options.getMinPrice(), options.getMaxPrice()));
 
-            if ( options.getMaxDriverRating() > options.getMinDriverRating() ) builder.and(qRide.driver.rating.between(options.getMaxDriverRating() , options.getMinDriverRating()));
-            if ( options.getPathway() != null ) builder.and(qRide.pathway.eq(options.getPathway()));
+            if (options.getMaxPrice()!= null && options.getMinPrice()!= null ) {
+                if ( options.getMaxPrice() > options.getMinPrice() ) builder.and(qRide.price.between(options.getMinPrice(), options.getMaxPrice()));
+            }
 
+            if (options.getMaxDriverRating()!= null && options.getMinDriverRating()!= null ) {
+                if (options.getMaxDriverRating() > options.getMinDriverRating()) {
+                    builder.and(qRide.driver.rating.between(options.getMaxDriverRating(), options.getMinDriverRating()));
+                }
+            }
+            if ( options.getPathway() != null ){
+                builder.and(qRide.pathway.eq(options.getPathway()));
+            }
             if ( options.getStartDate() != null ) {
                 LocalDateTime day_1 = options.getStartDate().atTime(LocalTime.now()).minusDays(1);
                 LocalDateTime day_2 = options.getStartDate().atTime(LocalTime.now()).plusDays(1);
                 builder.and(qRide.createdDate.between(day_1,day_2));
             }
-            if ( options.getStartTimeTo().isAfter(options.getStartTimeFrom()) ) builder.and(qRide.startTime.between(options.getStartTimeFrom(), options.getStartTimeTo()));
-            if ( options.getTags() != null && !options.getTags().isEmpty()) builder.and(qRide.maxPlaces.eq(options.getMaxPlaces()));
+            if (options.getStartTimeTo()!= null && options.getStartTimeFrom()!= null ) {
+                if ( options.getStartTimeTo().isAfter(options.getStartTimeFrom()) )
+                    builder.and(qRide.startTime.between(options.getStartTimeFrom(), options.getStartTimeTo()));
+            }
+            if ( options.getTags() != null && !options.getTags().isEmpty()){
+                builder.and(qRide.maxPlaces.eq(options.getMaxPlaces()));
+            }
         }
-        Class<Ride> c = Ride.class;
-        List<String> fields = Arrays.stream(c.getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
-        List<String> validProperties = Arrays.stream(options.getProperties()).filter(s -> fields.contains(s)).collect(Collectors.toList());
-        Sort.Direction sort = ( options.getOrder().equals(Order.ASC)) ? Sort.Direction.ASC : Sort.Direction.DESC ;
-        PageRequest pageRequest = PageRequest.of(options.getPage(), options.getLimit(), sort,validProperties.toArray(String[]::new));
+        System.out.println(options.getProperties());
+        Sort.Direction direction = (options.getOrder().equals(Order.DESC)) ? Sort.Direction.DESC: Sort.Direction.ASC ;
+        PageRequest pageRequest = PageRequest.of(page, limit,Sort.by(direction, options.getProperties()));
         return (builder.getValue() != null ) ? rideRepo.findAll(builder,pageRequest).map(RideDTO::fromEntity) : rideRepo.findAll(pageRequest).map(RideDTO::fromEntity);
     }
 
@@ -164,5 +191,16 @@ public class RideServiceImpl implements RideService{
         }catch (Exception e){
             throw new  InvalidResource("FAILED_TO_UPDATE_RIDE",e.getMessage());
         }
+    }
+
+    public String[] validProperties(String[] p){
+        Class<Ride> c = Ride.class;
+        List<String> fields = Arrays.stream(c.getDeclaredFields()).map(Field::getName).collect(Collectors.toList());
+        String[] sortPropert = (p!= null)?p: new String[]{"createdDate", "id"};
+        List<String> validProperties = Arrays.stream(sortPropert).filter(fields::contains).collect(Collectors.toList());
+
+        String sortProperties = (!validProperties.isEmpty())?String.join(",",validProperties):"createdDate,id";
+        System.out.println(validProperties);
+        return null;
     }
 }

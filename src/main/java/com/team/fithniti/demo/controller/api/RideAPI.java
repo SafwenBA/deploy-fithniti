@@ -23,7 +23,7 @@ public interface RideAPI {
             @ApiResponse(code = 403 ,message = "Forbidden: Bad credential"),
             @ApiResponse(code = 500, message = "Internal Server Error")
     })
-    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "", produces = MediaType.APPLICATION_JSON_VALUE,consumes = MediaType.APPLICATION_JSON_VALUE )
     RideDTO create(@RequestBody NewRide ride);
 
     @ApiOperation(value = "SEARCH RIDE",notes = "this method allow to search rides with custom filter",responseContainer = "Page<RideDTO>")
