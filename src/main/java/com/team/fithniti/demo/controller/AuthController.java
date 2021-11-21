@@ -23,7 +23,6 @@ public class AuthController  {
 
     @Autowired
     private UserService userService ;
-    private final String secret = "Wx[3U$NN?Zdc}t*z" ;
 
 
     @PostMapping(value = "/register")

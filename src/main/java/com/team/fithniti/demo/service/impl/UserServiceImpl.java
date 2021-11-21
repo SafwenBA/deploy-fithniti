@@ -23,6 +23,7 @@ import com.team.fithniti.demo.util.UserState;
 import com.team.fithniti.demo.util.UserType;
 import  com.team.fithniti.demo.validator.UserValidation;
 import lombok.AllArgsConstructor;
+import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -120,6 +121,38 @@ public class UserServiceImpl implements UserService {
         Optional<AppUser> user = userRepo.findByPhoneNumber(phoneNumber) ;
         if (user.isEmpty()) throw new ResourceNotFound("NOT_FOUND","Wrong phoneNumber !");
         return user.get().getId() ;
+    }
+
+    @Override
+    public UpdateResponse updateProfile(UUID userId, String newPassword, String newLogoUrl) {
+        Optional<AppUser> appUser = userRepo.findById(userId) ;
+        if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","user was not found ! ") ;
+        if (newPassword != null ) userRepo.updatePassword(newPassword,userId) ;
+        if (newLogoUrl != null) userRepo.updateLogo(newLogoUrl,userId) ;
+        return UpdateResponse.builder()
+                .status("UPDATED")
+                .message("Your Profile has been updated successfully !")
+                .build();
+    }
+
+    @Override
+    public void switchConnectedAs(UUID userId) {
+        Optional<AppUser> appUser = userRepo.findById(userId) ;
+        if (appUser.isEmpty())
+            throw new ResourceNotFound("NOT_FOUND","user was not found ! ") ;
+        switch (appUser.get().getLastConnectedAs()){
+            case Driver:
+                appUser.get().setLastConnectedAs(UserType.Passenger);
+                break ;
+            case Passenger:
+                appUser.get().setLastConnectedAs(UserType.Driver);
+                break ;
+        }
+    }
+
+    @Override
+    public void getUserDTO(UUID userId) {
+
     }
 
 

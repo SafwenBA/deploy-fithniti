@@ -24,5 +24,11 @@ public interface UserService {
     RoleChange changeRole(UUID user_id , Integer role_id) ;
     void refreshToken(HttpServletRequest request , HttpServletResponse response) throws IOException;
     UUID getIdByUsername(String phoneNumber) ;
+    UpdateResponse updateProfile(UUID userId,String password,String logoUrl) ;
+    // TODO: 11/15/2021  do the lastconnectedAs switch service here ( might return the desired DTO )
+    // TODO: 11/15/2021 fix the return types of these 2 homies
+    void switchConnectedAs(UUID userId) ;
+    void getUserDTO(UUID userId) ;
+
 
 }
