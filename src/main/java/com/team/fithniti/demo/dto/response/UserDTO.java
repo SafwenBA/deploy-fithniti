@@ -25,10 +25,10 @@ public class UserDTO {
     private LocalDate birthDate;
     private String photoURL;
 
-    private DriverDto driver;
-    private PassengerDto passenger;
+    //private DriverDto driver;
+    //private PassengerDto passenger;
 
-    public static UserDTO fromEntity(AppUser user,DriverDto driver, PassengerDto passenger){
+    public static UserDTO fromEntity(AppUser user){
         if(user == null)
             throw new InvalidResource(null,"INVALID_ENTITY","Can't map null entity");
         return UserDTO.builder()
@@ -40,8 +40,6 @@ public class UserDTO {
                 .phoneNumber(user.getPhoneNumber()) //add field to show/hide private data like address or phone
                 .state(user.getState())
                 .photoURL(user.getPhotoUrl())
-                .driver(driver)
-                .passenger(passenger)
                 .build();
     }
 }

@@ -18,6 +18,7 @@ public class PassengerDto {
     // par defaut yraj3lou coming Rides etc
     // 7ajtou b7aja o5ra ya3ml request :p
     //*
+    private UserDTO userDTO ;
 
     public PassengerDto fromEntity(Passenger passenger){
         if (passenger == null)
@@ -26,6 +27,7 @@ public class PassengerDto {
                 .id(passenger.getId())
                 .rating(passenger.getRating())
                 .ridesNumber(passenger.getRidesNumber())
+                .userDTO(UserDTO.fromEntity(passenger.getUser()))
                 .build();
     }
 
