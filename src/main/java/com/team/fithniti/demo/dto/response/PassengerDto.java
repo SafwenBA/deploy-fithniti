@@ -20,7 +20,7 @@ public class PassengerDto {
     //*
     private UserDTO userDTO ;
 
-    public PassengerDto fromEntity(Passenger passenger){
+    public static PassengerDto fromEntity(Passenger passenger){
         if (passenger == null)
             throw new InvalidResource(null,"INTERNAL ERROR","Can't map null entity");
         return PassengerDto.builder()

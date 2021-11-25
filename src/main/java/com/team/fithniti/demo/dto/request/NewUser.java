@@ -23,7 +23,7 @@ public class NewUser {
     private String firstName;
     private String lastName;
     private String address;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
+//    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
     private String photoUrl ;
 

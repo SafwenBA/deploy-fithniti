@@ -37,17 +37,16 @@ public class PassengerServiceImpl implements PassengerService {
     @Override
     public PassengerReview createReview(PassengerReview passengerReview, Long rideId) {
         //Assigning the review to the concurrent driver
-        rideRepo.findById(rideId).ifPresentOrElse(ride -> {
-            Driver driver = ride.getDriver();
-            List<PassengerReview> updatedPassengerReviews = Stream.concat(
-                    driver.getPassengerReviews().stream(), Stream.of(passengerReview)
-                    ).collect(Collectors.toList());
-            driver.setPassengerReviews(updatedPassengerReviews);
-            ride.setDriver(driver);
-            rideRepo.save(ride);
-            // TODO: Change exception after implementation
-        }, () -> { throw new IllegalStateException("Ride not found"); });
-
-        return passengerReview;
+//        rideRepo.findById(rideId).orElseThrow(ride -> {
+//            Driver driver = ride.getDriver();
+//            List<PassengerReview> updatedPassengerReviews = Stream.concat(
+//                    driver.getPassengerReviews().stream(), Stream.of(passengerReview)
+//                    ).collect(Collectors.toList());
+//            driver.setPassengerReviews(updatedPassengerReviews);
+//            ride.setDriver(driver);
+//            rideRepo.save(ride);
+//            // TODO: Change exception after implementation
+//        }, () -> { throw new IllegalStateException("Ride not found"); });
+        return null;
     }
 }

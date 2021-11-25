@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 public interface CarModelRepo extends JpaRepository<CarModel, Long> {
 
     @Transactional
@@ -15,4 +17,5 @@ public interface CarModelRepo extends JpaRepository<CarModel, Long> {
 
     //This method check if a car model exists for a given brand or no
     Boolean existsCarModelByCarBrandAndModel(String brand, String model);
+    Optional<CarModel> findCarModelByCarBrandAndModel(String brand, String model);
 }

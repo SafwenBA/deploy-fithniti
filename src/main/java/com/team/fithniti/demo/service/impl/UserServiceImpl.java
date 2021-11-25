@@ -52,17 +52,24 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @AllArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
-
+    @Autowired
     private final UserRepo userRepo;
+    @Autowired
     private final RoleRepo roleRepo;
+    @Autowired
     private final DriverRepo driverRepo ;
+    @Autowired
     private final PassengerRepo passengerRepo ;
+    @Autowired
     private final UserRegistrationRequestRepo userRegistrationRequestRepo ;
+    @Autowired
     private final TwilioService twilioService ;
+    @Autowired
     private final MyUserDetailsService myUserDetailsService;
+    @Autowired
     private final UserRecoveryRequestRepo userRecoveryRequestRepo ;
-
-     private final FlickrService flickrService ;
+    @Autowired
+    private final FlickrService flickrService ;
 
     @Autowired
     private final AuthenticationManager authenticationManager;
@@ -151,6 +158,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public RegistrationSuccessful create(NewUser user) {
+        System.out.println("Hello from servcie ...");
         List<String> errors = UserValidation.validate(user);
         if (!errors.isEmpty())
             throw new InvalidResource(errors, "BAD_REQUEST","Invalid user !");
@@ -169,7 +177,7 @@ public class UserServiceImpl implements UserService {
         // assign the default user role to all new users
         Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
         userRole.ifPresent(appUser::setRole);
-        userRepo.save(appUser) ;
+        userRepo.save(appUser);
         // we assign a driver and a passenger objects relative to our AppUser object
         driverRepo.save(Driver.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
         passengerRepo.save(Passenger.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
@@ -183,11 +191,11 @@ public class UserServiceImpl implements UserService {
                 .build() ;
         userRegistrationRequestRepo.save(request) ;
         // send sms with twilio
-        twilioService.sendSms(SmsRequest.builder()
-                        .phoneNumber(appUser.getPhoneNumber())
-                        .message("Your <fiThniti> Account Verification Code is "
-                                +request.getVerificationCode())
-                .build());
+//        twilioService.sendSms(SmsRequest.builder()
+//                        .phoneNumber(appUser.getPhoneNumber())
+//                        .message("Your <fiThniti> Account Verification Code is "
+//                                +request.getVerificationCode())
+//                .build());
         return new RegistrationSuccessful(appUser);
     }
 
