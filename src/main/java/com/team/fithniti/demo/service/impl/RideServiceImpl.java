@@ -140,7 +140,7 @@ public class RideServiceImpl implements RideService{
                 builder.and(qRide.maxPlaces.eq(options.getMaxPlaces()));
             }
         }
-        System.out.println(options.getProperties());
+        //System.out.println(options.getProperties());
         Sort.Direction direction = (options.getOrder().equals(Order.DESC)) ? Sort.Direction.DESC: Sort.Direction.ASC ;
         PageRequest pageRequest = PageRequest.of(page, limit,Sort.by(direction, options.getProperties()));
         return (builder.getValue() != null ) ? rideRepo.findAll(builder,pageRequest).map(RideDTO::fromEntity) : rideRepo.findAll(pageRequest).map(RideDTO::fromEntity);
