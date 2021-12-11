@@ -20,5 +20,6 @@ public class AdminSuccessfulAuth extends AdminAuthResponse{
     private  String photoUrl ;
     private Date tokenExpirationDate ;
     private String role ;
+    private String username;
 
 }

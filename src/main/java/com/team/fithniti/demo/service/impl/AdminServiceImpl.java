@@ -101,6 +101,7 @@ public class AdminServiceImpl implements AdminService {
         if (Objects.equals(role, "USER"))
             return new ResponseEntity(new AdminUnsuccessfulAuth("Invalid user!"), HttpStatus.BAD_REQUEST) ;
         String userLogo = appuser.getPhotoUrl() ;
+        String fullName = appuser.getFirstName() + " " + appuser.getLastName();
         UUID userId = appuser.getId();
         Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8)) ;
         // TODO: 11/12/2021 set this back to 10 mins lul , users will die before their token expires :v
@@ -122,6 +123,7 @@ public class AdminServiceImpl implements AdminService {
                 .photoUrl(userLogo)
                 .tokenExpirationDate(expiryDate)
                 .role(role)
+                .username(fullName)
                 .build());
     }
 
