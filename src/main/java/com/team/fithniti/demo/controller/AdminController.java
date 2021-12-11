@@ -28,7 +28,6 @@ public class AdminController implements AdminAPI {
     @Override
     @PostMapping("/ban")
     public AdminAction ban(@RequestParam UUID user_id) {
-
         return adminService.ban(userRepo.findById(user_id).get()) ;
     }
 
@@ -39,13 +38,13 @@ public class AdminController implements AdminAPI {
     }
 
     @Override
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody AuthenticationRequest request) {
+    @PostMapping("/auth/login")
+    public ResponseEntity<AdminAuthResponse> login(@RequestBody AuthenticationRequest request) {
      return adminService.login(request) ;
     }
 
     @Override
-    @PostMapping("/register")
+    @PostMapping("/auth/register")
     public RegistrationSuccessful registerAdmin(@RequestBody NewAdmin admin) {
         return adminService.registerAdmin(admin) ;
 

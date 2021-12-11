@@ -12,6 +12,6 @@ import org.springframework.http.ResponseEntity;
 public interface AdminService {
     AdminAction ban(AppUser appUser) ;
     AdminAction warn(AppUser appUser) ;
-    ResponseEntity<?> login(AuthenticationRequest request) ;
+    ResponseEntity<AdminAuthResponse> login(AuthenticationRequest request) ;
     RegistrationSuccessful registerAdmin(NewAdmin admin) ;
 }

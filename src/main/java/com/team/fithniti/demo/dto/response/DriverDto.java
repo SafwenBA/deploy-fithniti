@@ -19,6 +19,7 @@ public class DriverDto {
     private double rating;
     private Integer ridesNumber;
     // coming Rides etc
+    private UserDTO userDTO ;
 
 
     public static DriverDto fromEntity(Driver driver){
@@ -29,6 +30,7 @@ public class DriverDto {
                 .rating(driver.getRating())
                 .ridesNumber(driver.getRidesNumber())
                 //* to complete
+                .userDTO(UserDTO.fromEntity(driver.getUser()))
                 .build();
     }
 }

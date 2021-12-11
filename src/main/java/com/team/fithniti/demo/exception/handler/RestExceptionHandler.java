@@ -16,13 +16,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(InvalidResource.class)
     public ResponseEntity<?> handleException(InvalidResource exception) {
-        final HttpStatus notFound = HttpStatus.BAD_REQUEST;
+        final HttpStatus badRequest = HttpStatus.BAD_REQUEST;
         final ErrorDTO errorDto = ErrorDTO.builder()
                 .errorCode(exception.getErrorCode())
-                .httpCode(notFound.value())
-                .message(exception.getErrors().toString())
+                .httpCode(badRequest.value())
+                .message(exception.getMessage())
                 .build();
-        return new ResponseEntity<>(errorDto, notFound);
+        return new ResponseEntity<>(errorDto, badRequest);
     }
 
     @ExceptionHandler(ResourceExists.class)
@@ -39,11 +39,11 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(ResourceNotFound.class)
     public ResponseEntity<?> handleException(ResourceNotFound exception) {
-        final HttpStatus badRequest = HttpStatus.BAD_REQUEST;
+        final HttpStatus notFound = HttpStatus.NOT_FOUND;
         final ErrorDTO errorDto = ErrorDTO.builder()
-                .httpCode(badRequest.value())
+                .httpCode(notFound.value())
                 .message(exception.getMessage())
                 .build();
-        return new ResponseEntity<>(errorDto, badRequest);
+        return new ResponseEntity<>(errorDto, notFound);
     }
 }

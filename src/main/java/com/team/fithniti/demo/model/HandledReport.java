@@ -19,4 +19,9 @@ public class HandledReport extends Auditable{
     private ReportAction action;
     private String reason;
 
+    @OneToOne
+    private Admin admin;
+
+    @OneToOne
+    private RideReport rideReport;
 }

@@ -45,13 +45,16 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         auth.authenticationProvider(daoAuthenticationProvider());
     }
 
-    // TODO: 11/12/2021 remove admin permit all
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests().antMatchers("/auth/**", "/flickr/**", "/admin/**")
-
+        http.csrf().disable();
+        http.authorizeRequests().antMatchers("/auth/**",
+                        "/flickr/**",
+                        "/admin/auth/**",
+                        "/api/v2/cars/**",
+                        "/api/v2/car-models/**",
+                        "/tag/**")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and().sessionManagement()

@@ -9,16 +9,20 @@ import com.team.fithniti.demo.dto.response.*;
 import com.team.fithniti.demo.exception.InvalidResource;
 import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
+import com.team.fithniti.demo.model.Admin;
 import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.model.Role;
+import com.team.fithniti.demo.repository.AdminRepo;
 import com.team.fithniti.demo.repository.RoleRepo;
 import com.team.fithniti.demo.repository.UserRepo;
 import com.team.fithniti.demo.service.AdminService;
+import com.team.fithniti.demo.service.FlickrService;
 import com.team.fithniti.demo.service.TwilioService;
 import com.team.fithniti.demo.util.Constants;
 import com.team.fithniti.demo.util.UserState;
 import com.team.fithniti.demo.util.UserType;
 import com.team.fithniti.demo.validator.UserValidation;
+import com.twilio.http.Response;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,6 +55,10 @@ public class AdminServiceImpl implements AdminService {
     private final MyUserDetailsService myUserDetailsService;
     @Autowired
     private final TwilioService twilioService ;
+    @Autowired
+    private final FlickrService flickrService ;
+    @Autowired
+    private final AdminRepo adminRepo ;
 
     @Override
     public AdminAction ban(AppUser appUser) {
@@ -87,21 +95,20 @@ public class AdminServiceImpl implements AdminService {
         }
 
     @Override
-    public ResponseEntity<?> login(AuthenticationRequest request) {
-        //AdminAuthResponse
+    public ResponseEntity<AdminAuthResponse> login(AuthenticationRequest request) {
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getPhoneNumber(), request.getPassword()));
         } catch (BadCredentialsException e){
-            return new ResponseEntity(new AdminUnsuccessfulAuth("Invalid user!"), HttpStatus.BAD_REQUEST) ;
+            return new ResponseEntity<>(new AdminUnsuccessfulAuth("WRONG_CREDENTIALS","Please check your credentials ! "),
+                    HttpStatus.BAD_REQUEST) ;
         }
-
         final UserDetails userDetails = myUserDetailsService.loadUserByUsername(request.getPhoneNumber());
         AppUser appuser = userRepo.findByPhoneNumber(userDetails.getUsername()).get() ;
         String role = appuser.getRole().getName() ;
         if (Objects.equals(role, "USER"))
-            return new ResponseEntity(new AdminUnsuccessfulAuth("Invalid user!"), HttpStatus.BAD_REQUEST) ;
+            return new ResponseEntity<>(new AdminUnsuccessfulAuth("WRONG_CREDENTIALS","Please check your credentials ! "),
+                HttpStatus.BAD_REQUEST) ;
         String userLogo = appuser.getPhotoUrl() ;
-        String fullName = appuser.getFirstName() + " " + appuser.getLastName();
         UUID userId = appuser.getId();
         Algorithm algorithm = Algorithm.HMAC256(Constants.SECRET.getBytes(StandardCharsets.UTF_8)) ;
         // TODO: 11/12/2021 set this back to 10 mins lul , users will die before their token expires :v
@@ -116,15 +123,15 @@ public class AdminServiceImpl implements AdminService {
                 .withSubject(userDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
-        return ResponseEntity.ok(AdminSuccessfulAuth.builder()
+        return new ResponseEntity<>(AdminSuccessfulAuth.builder()
+                .status("LOGGED_IN")
                 .adminId(userId)
                 .access_token(access_token)
                 .refreshToken(refresh_token)
                 .photoUrl(userLogo)
                 .tokenExpirationDate(expiryDate)
                 .role(role)
-                .username(fullName)
-                .build());
+                .build(),HttpStatus.OK);
     }
 
     @Override
@@ -136,15 +143,16 @@ public class AdminServiceImpl implements AdminService {
         if (exists)
             throw new ResourceExists("FOUND","Phone Number Exists Try another !") ;
         AppUser appUser = admin.convertToAppUser() ;
-        appUser.setLastConnectedAs(UserType.Passenger);
         if(appUser.getPhotoUrl() == null || appUser.getPhotoUrl().equals("")){
             // set default logo
-            //todo - uncomment this when image service is active
-            //appUser.setPhotoUrl(imageService.getDefaultLogo());
+            appUser.setPhotoUrl(flickrService.getDefaultLogo());
         }
         Optional<Role> userRole = roleRepo.getRoleByName("ADMIN") ;
         userRole.ifPresent(appUser::setRole);
         userRepo.save(appUser) ;
+        adminRepo.save(Admin.builder()
+                        .user(appUser)
+                .build()) ;
         return new RegistrationSuccessful(appUser,"Admin Account has been created Successfully ! ") ;
     }
 }

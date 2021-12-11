@@ -41,17 +41,18 @@ public class DriverServiceImpl implements DriverService {
     //TODO : change with DTO
     @Override
     public PassengerReview createReview(PassengerReview passengerReview, Long passengerId) {
-        //Assigning the review to the concurrent passenger
-        passengerRepo.findById(passengerId).ifPresentOrElse(passenger -> {
-            List<PassengerReview> updatedPassengerReviews = Stream.concat(
-                    passenger.getPassengerReviews().stream(), Stream.of(passengerReview)
-            ).collect(Collectors.toList());
-            passenger.setPassengerReviews(updatedPassengerReviews);
-            passengerRepo.save(passenger);
-            // TODO: Change exception after implementation
-        }, () -> { throw new IllegalStateException("Passenger not found"); });
-
-        return passengerReview;
+//        //Assigning the review to the concurrent passenger
+//        passengerRepo.findById(passengerId).ifPresentOrElse(passenger -> {
+//            List<PassengerReview> updatedPassengerReviews = Stream.concat(
+//                    passenger.getPassengerReviews().stream(), Stream.of(passengerReview)
+//            ).collect(Collectors.toList());
+//            passenger.setPassengerReviews(updatedPassengerReviews);
+//            passengerRepo.save(passenger);
+//            // TODO: Change exception after implementation
+//        }, () -> { throw new IllegalStateException("Passenger not found"); });
+//
+//        return passengerReview;
+        return null;
     }
 
 }

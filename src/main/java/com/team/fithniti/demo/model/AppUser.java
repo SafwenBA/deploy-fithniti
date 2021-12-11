@@ -32,7 +32,6 @@ public class AppUser extends Auditable implements UserDetails {
     private String firstName;
     private String lastName;
     private String address;
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate birthDate;
     private UserState state;
     private String photoUrl ;

@@ -1,13 +1,16 @@
 package com.team.fithniti.demo.controller;
 
 import com.team.fithniti.demo.controller.api.UserAPI;
+import com.team.fithniti.demo.dto.response.UpdateResponse;
+import com.team.fithniti.demo.dto.response.WarningDismiss;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.repository.UserRepo;
+import com.team.fithniti.demo.service.UserService;
 import com.team.fithniti.demo.util.UserState;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.util.Optional;
@@ -19,19 +22,23 @@ import java.util.UUID;
 @Transactional
 public class UserController implements UserAPI {
 
-    private final UserRepo userRepo ;
+    @Autowired
+    private final UserService userService ;
 
-    //todo - add change state to normal when alerted
     @Override
-    public void dismissWarning(UUID user_id) {
-        Optional<AppUser> appUser = userRepo.findById(user_id) ;
-        if (appUser.isEmpty())
-            throw new ResourceNotFound("400","could not find user with given id !") ;
-        if (appUser.get().getState().equals(UserState.WARNED))
-            appUser.get().setState(UserState.ACTIVE);
+    @PostMapping("/dismiss")
+    public WarningDismiss dismissWarning(@RequestParam UUID user_id) {
+        return userService.dismissWarning(user_id) ;
     }
 
-    //todo - add logo update & password update
+    @Override
+    @PutMapping("/update")
+    public UpdateResponse updateProfile(@RequestParam(required = false)UUID userId,
+                                        @RequestParam(required = false) String newPassword,
+                                        @RequestParam(required = false) String newLogoUrl) {
+        return userService.updateProfile(userId, newPassword, newLogoUrl) ;
+    }
+
 
 
 

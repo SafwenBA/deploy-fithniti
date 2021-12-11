@@ -29,7 +29,7 @@ public class NewRide {
     private Byte maxPlaces;
     private Float price;
     private LocalTime startTime;
-    List<Tag> tags;
+//    List<Tag> tags;// List<String>
     private Long idDriver;
     private CarDTO car;
 

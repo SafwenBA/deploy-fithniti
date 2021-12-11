@@ -1,14 +1,10 @@
 package com.team.fithniti.demo;
 
-import com.team.fithniti.demo.config.twilio.SmsRequest;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.DriverRepo;
 import com.team.fithniti.demo.repository.PassengerRepo;
 import com.team.fithniti.demo.repository.RideRepo;
 import com.team.fithniti.demo.repository.RoleRepo;
-import com.team.fithniti.demo.service.FlickrService;
-import com.team.fithniti.demo.service.impl.FlickrServiceImpl;
-import com.team.fithniti.demo.util.RideState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -20,11 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @SpringBootApplication
 @EnableJpaAuditing
 public class DemoApplication implements CommandLineRunner {
-
     public static void main(String[] args) {
         SpringApplication.run(DemoApplication.class, args);
     }
-
 
     @Autowired
     private RoleRepo roleRepo;
@@ -43,10 +37,8 @@ public class DemoApplication implements CommandLineRunner {
         return new BCryptPasswordEncoder() ;
     }
 
-
     @Override
     public void run(String... args) throws Exception {
-
         Role user = new Role(1, "USER");
         Role admin = new Role(2, "ADMIN");
         Role superAdmin = new Role(3, "SUPER_ADMIN");

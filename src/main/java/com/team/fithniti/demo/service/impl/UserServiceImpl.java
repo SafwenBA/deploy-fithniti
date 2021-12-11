@@ -13,6 +13,7 @@ import com.team.fithniti.demo.exception.ResourceExists;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.*;
+import com.team.fithniti.demo.service.FlickrService;
 import com.team.fithniti.demo.service.ImageService;
 import com.team.fithniti.demo.service.TwilioService;
 import com.team.fithniti.demo.service.UserService;
@@ -22,7 +23,10 @@ import com.team.fithniti.demo.util.UserState;
 import com.team.fithniti.demo.util.UserType;
 import  com.team.fithniti.demo.validator.UserValidation;
 import lombok.AllArgsConstructor;
+import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -48,18 +52,24 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 @AllArgsConstructor
 @Transactional
 public class UserServiceImpl implements UserService {
-
+    @Autowired
     private final UserRepo userRepo;
+    @Autowired
     private final RoleRepo roleRepo;
+    @Autowired
     private final DriverRepo driverRepo ;
+    @Autowired
     private final PassengerRepo passengerRepo ;
+    @Autowired
     private final UserRegistrationRequestRepo userRegistrationRequestRepo ;
+    @Autowired
     private final TwilioService twilioService ;
+    @Autowired
     private final MyUserDetailsService myUserDetailsService;
+    @Autowired
     private final UserRecoveryRequestRepo userRecoveryRequestRepo ;
-
-    // TODO: 11/12/2021 uncomment this after merge with safwen
-    // private final FlickrService flickrService ;
+    @Autowired
+    private final FlickrService flickrService ;
 
     @Autowired
     private final AuthenticationManager authenticationManager;
@@ -70,19 +80,22 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public AuthenticationResponse login(AuthenticationRequest request ) {
+    public ResponseEntity<AuthenticationResponse> login(AuthenticationRequest request ) {
         try{
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getPhoneNumber(),request.getPassword()));
         } catch (BadCredentialsException e){
-            return new InvalidAuthentication("INVALID_CREDENTIALS","Incorrect Credentials ! ") ;
+            return new ResponseEntity<>(new InvalidAuthentication("INVALID_CREDENTIALS","Incorrect Credentials ! "),
+                    HttpStatus.BAD_REQUEST) ;
         }
         final UserDetails userDetails = myUserDetailsService.loadUserByUsername(request.getPhoneNumber());
         AppUser appuser = userRepo.findByPhoneNumber(userDetails.getUsername()).get() ;
         // if the user account is not confirmed
         if (!appuser.isConfirmed())
-            return  new UnconfirmedAuthentication("NOT_CONFIRMED",appuser.getId(),"Please Confirm Your Account ! ")  ;
+            return  new ResponseEntity<>(new UnconfirmedAuthentication("NOT_CONFIRMED",appuser.getId(),"Please Confirm Your Account ! "),
+                    HttpStatus.BAD_REQUEST)  ;
         if (appuser.getState() == UserState.PERM_BANNED) {
-            return new InvalidAuthentication("PERMA_BAN","Your account has been banned permanently for violating our code of conduct !") ;
+            return new ResponseEntity<>(new InvalidAuthentication("PERMA_BAN","Your account has been banned permanently for violating our code of conduct !"),
+                    HttpStatus.BAD_REQUEST) ;
         }
         UUID userId = appuser.getId();
         String userLogo = appuser.getPhotoUrl();
@@ -99,7 +112,8 @@ public class UserServiceImpl implements UserService {
                 .withSubject(userDetails.getUsername())
                 .withExpiresAt(new Date(System.currentTimeMillis()+ 30*60*1000))
                 .sign(algorithm) ;
-        return new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate,appuser.getState(),appuser.getLastConnectedAs(),role);
+        return new ResponseEntity<>(new ValidAuthentication("LOGGED_IN",userId,access_token,refresh_token,userLogo,expiryDate,appuser.getState(),appuser.getLastConnectedAs(),role),
+                HttpStatus.OK);
     }
 
     @Override
@@ -109,9 +123,42 @@ public class UserServiceImpl implements UserService {
         return user.get().getId() ;
     }
 
+    @Override
+    public UpdateResponse updateProfile(UUID userId, String newPassword, String newLogoUrl) {
+        Optional<AppUser> appUser = userRepo.findById(userId) ;
+        if (appUser.isEmpty()) throw new ResourceNotFound("NOT_FOUND","user was not found ! ") ;
+        if (newPassword != null ) userRepo.updatePassword(newPassword,userId) ;
+        if (newLogoUrl != null) userRepo.updateLogo(newLogoUrl,userId) ;
+        return UpdateResponse.builder()
+                .status("UPDATED")
+                .message("Your Profile has been updated successfully !")
+                .build();
+    }
+
+    @Override
+    public void switchConnectedAs(UUID userId) {
+        Optional<AppUser> appUser = userRepo.findById(userId) ;
+        if (appUser.isEmpty())
+            throw new ResourceNotFound("NOT_FOUND","user was not found ! ") ;
+        switch (appUser.get().getLastConnectedAs()){
+            case Driver:
+                appUser.get().setLastConnectedAs(UserType.Passenger);
+                break ;
+            case Passenger:
+                appUser.get().setLastConnectedAs(UserType.Driver);
+                break ;
+        }
+    }
+
+    @Override
+    public void getUserDTO(UUID userId) {
+
+    }
+
 
     @Override
     public RegistrationSuccessful create(NewUser user) {
+        System.out.println("Hello from servcie ...");
         List<String> errors = UserValidation.validate(user);
         if (!errors.isEmpty())
             throw new InvalidResource(errors, "BAD_REQUEST","Invalid user !");
@@ -125,13 +172,12 @@ public class UserServiceImpl implements UserService {
         appUser.setLastConnectedAs(UserType.Passenger);
         if(appUser.getPhotoUrl() == null || appUser.getPhotoUrl().equals("")){
             // set default logo
-            //todo - uncomment this when image service is active
-            //appUser.setPhotoUrl(flickrService.getDefaultLogo());
+            appUser.setPhotoUrl(flickrService.getDefaultLogo());
         }
         // assign the default user role to all new users
         Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
         userRole.ifPresent(appUser::setRole);
-        userRepo.save(appUser) ;
+        userRepo.save(appUser);
         // we assign a driver and a passenger objects relative to our AppUser object
         driverRepo.save(Driver.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
         passengerRepo.save(Passenger.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
@@ -145,16 +191,16 @@ public class UserServiceImpl implements UserService {
                 .build() ;
         userRegistrationRequestRepo.save(request) ;
         // send sms with twilio
-        twilioService.sendSms(SmsRequest.builder()
-                        .phoneNumber(appUser.getPhoneNumber())
-                        .message("Your <fiThniti> Account Verification Code is "
-                                +request.getVerificationCode())
-                .build());
+//        twilioService.sendSms(SmsRequest.builder()
+//                        .phoneNumber(appUser.getPhoneNumber())
+//                        .message("Your <fiThniti> Account Verification Code is "
+//                                +request.getVerificationCode())
+//                .build());
         return new RegistrationSuccessful(appUser);
     }
 
     @Override
-    public VerificationResponse verifyAccount(UUID user_id , String verificationCode) {
+    public ResponseEntity<VerificationResponse> verifyAccount(UUID user_id , String verificationCode) {
         Optional<UserRegistrationRequest> registrationRequest = userRegistrationRequestRepo.findByUserId(user_id) ;
         if (registrationRequest.isEmpty()) throw new ResourceNotFound("NOT_FOUND","Request was not found !") ;
         UserRegistrationRequest request = registrationRequest.get() ;
@@ -163,20 +209,20 @@ public class UserServiceImpl implements UserService {
             request.getUser().setConfirmed(true);
             userRegistrationRequestRepo.delete(request);
             //request.setRequestState(RequestState.DONE); // we could set the request state to done or delete it
-            return VerificationResponse.builder()
-                            .verificationState("VERIFIED")
+            return new ResponseEntity<>(VerificationResponse.builder()
+                    .verificationState("VERIFIED")
                     .message("Account Has Been Verified Successfully , please log in !")
-                    .build();
+                    .build(),HttpStatus.OK);
         }else{
             // incorrect code and has attempts left
             if (request.getAttemptsNumber()<2) {
                 request.setAttemptsNumber(request.getAttemptsNumber()+1);
-                return VerificationResponse.builder()
+                return new ResponseEntity<>(VerificationResponse.builder()
                         .verificationState("FAILED")
                         .message(
                                 String.format("Verification code is incorrect , you have %s attempts left " +
                                         "before another code is issued !",(3-request.getAttemptsNumber())))
-                        .build();
+                        .build(),HttpStatus.BAD_REQUEST);
             }
             else {
                 // incorrect code and has no attempts left -> issue a new code
@@ -195,10 +241,10 @@ public class UserServiceImpl implements UserService {
                         .message("Your <fiThniti> Account Verification Code is "
                                 +newRequest.getVerificationCode())
                         .build());
-                return VerificationResponse.builder()
+                return new ResponseEntity<>(VerificationResponse.builder()
                         .verificationState("FAILED")
                         .message("Verification code is incorrect , a new code has been issued , please check your phone !")
-                        .build();
+                        .build(),HttpStatus.BAD_REQUEST);
             }
 
         }
@@ -237,20 +283,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public RecoveryResponse validateRecoveryCode(RecoveryValidationRequest validationRequest) {
+    public ResponseEntity<RecoveryResponse> validateRecoveryCode(RecoveryValidationRequest validationRequest) {
         Optional<UserRecoveryRequest> request = userRecoveryRequestRepo.findByRecoveryCode(validationRequest.getRecoveryCode()) ;
-        if (request.isEmpty()) throw new ResourceNotFound("NOT-FOUND","No Recovery Request has " +
+        if (request.isEmpty()) throw new ResourceNotFound("NOT_FOUND","No Recovery Request has " +
                 "been found associated with the given code !") ;
         if (Objects.equals(request.get().getUser().getPhoneNumber(), validationRequest.getPhoneNumber()))
-            return RecoveryResponse.builder()
+            return new ResponseEntity<>(RecoveryResponse.builder()
                     .status("VALIDATED")
                     .message("Recovery code is valid for phone number "+validationRequest.getPhoneNumber())
-                    .build();
+                    .build(),HttpStatus.OK);
         else {
-            return RecoveryResponse.builder()
+            return new ResponseEntity<>(RecoveryResponse.builder()
                     .status("NOT_VALIDATED")
                     .message("Invalid Recovery Code !")
-                    .build();
+                    .build(),HttpStatus.BAD_REQUEST);
         }
     }
 
