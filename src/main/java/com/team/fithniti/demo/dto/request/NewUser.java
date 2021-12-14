@@ -11,6 +11,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Only required fields for registration

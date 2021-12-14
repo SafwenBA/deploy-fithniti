@@ -6,6 +6,7 @@ import com.team.fithniti.demo.dto.response.HandledReportDTO;
 import com.team.fithniti.demo.dto.response.ReportCard;
 import com.team.fithniti.demo.dto.response.ReportSubmitted;
 import com.team.fithniti.demo.dto.response.RideReportDTO;
+import com.team.fithniti.demo.model.RideReport;
 import com.team.fithniti.demo.service.ReportService;
 import com.team.fithniti.demo.util.ReportFilter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +41,17 @@ public class ReportController implements ReportAPI {
     }
 
     @Override
-    public Page<ReportCard> getUserListWithReportCounter(int x, String option) {
-        return reportService.getUserListWithReportCounter(x, ReportFilter.valueOf(option));
+    public List<ReportCard> getUserListWithReportCounter(int x, String option) {
+        return reportService.getUserListWithReportCounter(x, option);
     }
 
     @Override
     public List<HandledReportDTO> getHandledReportsByAdmin(UUID adminId) {
         return reportService.getAllReportsByAdmin(adminId);
+    }
+
+    @Override
+    public List<RideReport> getAllReports() {
+        return reportService.getAllReports();
     }
 }

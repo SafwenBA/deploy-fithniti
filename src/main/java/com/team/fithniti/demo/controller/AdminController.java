@@ -7,6 +7,7 @@ import com.team.fithniti.demo.dto.response.AdminAction;
 import com.team.fithniti.demo.dto.response.AdminAuthResponse;
 import com.team.fithniti.demo.dto.response.AdminSuccessfulAuth;
 import com.team.fithniti.demo.dto.response.RegistrationSuccessful;
+import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.repository.UserRepo;
 import com.team.fithniti.demo.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,5 +49,11 @@ public class AdminController implements AdminAPI {
     public RegistrationSuccessful registerAdmin(@RequestBody NewAdmin admin) {
         return adminService.registerAdmin(admin) ;
 
+    }
+
+    @Override
+    @GetMapping("/user/{id}")
+    public AppUser getAppUserById(@PathVariable UUID id) {
+        return adminService.getAppUserById(id);
     }
 }

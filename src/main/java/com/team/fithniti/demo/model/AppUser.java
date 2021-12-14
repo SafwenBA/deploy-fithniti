@@ -23,8 +23,9 @@ import java.util.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AppUser extends Auditable implements UserDetails {
-    @Id
+
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Id
     private UUID id;
 
     private String phoneNumber;

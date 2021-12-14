@@ -66,11 +66,11 @@ public class AdminServiceImpl implements AdminService {
         if (!exists)
             throw new ResourceNotFound("NOT_FOUND","user was not found !") ;
         appUser.setState(UserState.PERM_BANNED);
-        twilioService.sendSms(SmsRequest.builder()
-                        .phoneNumber(appUser.getPhoneNumber())
-                        .message("Your <fithniety> Account has been banned for good ," +
-                                " say goodbye to our services mothaf##a!")
-                .build());
+//        twilioService.sendSms(SmsRequest.builder()
+//                        .phoneNumber(appUser.getPhoneNumber())
+//                        .message("Your <fithniety> Account has been banned for good ," +
+//                                " say goodbye to our services mothaf##a!")
+//                .build());
         return AdminAction.builder()
                 .status("BAN_ISSUED")
                 .message("Ban has been issued to user with id "+appUser.getId())
@@ -154,5 +154,10 @@ public class AdminServiceImpl implements AdminService {
                         .user(appUser)
                 .build()) ;
         return new RegistrationSuccessful(appUser,"Admin Account has been created Successfully ! ") ;
+    }
+
+    @Override
+    public AppUser getAppUserById(UUID id) {
+        return userRepo.findById(id).get();
     }
 }

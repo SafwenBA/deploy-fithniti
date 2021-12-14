@@ -9,6 +9,7 @@ import com.team.fithniti.demo.dto.response.RideReportDTO;
 import com.team.fithniti.demo.exception.ResourceNotFound;
 import com.team.fithniti.demo.model.*;
 import com.team.fithniti.demo.repository.*;
+import com.team.fithniti.demo.service.DriverService;
 import com.team.fithniti.demo.service.ReportService;
 import com.team.fithniti.demo.util.ReportAction;
 import com.team.fithniti.demo.util.ReportFilter;
@@ -24,6 +25,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.team.fithniti.demo.model.QDriver.driver;
+
 @Service
 public class ReportServiceImpl implements ReportService {
 
@@ -75,10 +79,20 @@ public class ReportServiceImpl implements ReportService {
             //reported is the driver
             //Increment driver report counter by
             //DriverService.updateReportCounter(UUID driver)
+            Optional<AppUser> appUserDriver = userRepo.findById(newReport.getReportedId());
+            Driver driverToUpdate = driverRepo.findByUser(appUserDriver.get()).get();
+            driverToUpdate.setReportsCount(driverToUpdate.getReportsCount() + 1);
+
+            driverRepo.save(driverToUpdate);
         }else{
             //he is not the driver
             //Increment Passenger report counter by
             //PassengerService.updateReportCounter(UUID passenger)
+            Optional<AppUser> appUserPassenger = userRepo.findById(newReport.getReportedId());
+            Passenger passengerToUpdate = passengerRepo.findByUser(appUserPassenger.get()).get();
+            passengerToUpdate.setReportsCount(passengerToUpdate.getReportsCount() + 1);
+
+            passengerRepo.save(passengerToUpdate);
         }
         rideReportRepo.save(rideReport);
         return ReportSubmitted.builder()
@@ -124,33 +138,33 @@ public class ReportServiceImpl implements ReportService {
     }
 
     @Override
-    public Page<ReportCard> getUserListWithReportCounter(int x, ReportFilter options) {
+    public List<ReportCard> getUserListWithReportCounter(int x, String options) {
         switch (options){
-            case DRIVER:{
-                return driverRepo.getDriversByReportsCountGreaterThan(x,
-                        PageRequest.of(1,10, Sort.by("reportsCounter"))//TODO: GET THOSE VALUES
-                ).map(driver -> ReportCard.builder()
+            //TODO: GET THOSE VALUES
+            case "DRIVER":{
+                return driverRepo.findAll().stream().map(driver -> ReportCard.builder()
+                        .id(driver.getUser().getId())
                         .firstName(driver.getUser().getFirstName())
                         .lastName(driver.getUser().getLastName())
                         .phoneNumber(driver.getUser().getPhoneNumber())
                         .photoURL(driver.getUser().getPhotoUrl())
                         .nbrReport(driver.getReportsCount())
                         .build()
-                );
+                ).collect(Collectors.toList());
             }
-            case PASSENGER:{
-                return passengerRepo.getPassengersByReportsCountGreaterThan(x,
-                        PageRequest.of(1,10, Sort.by("reportsCounter"))//TODO: GET THOSE VALUES
-                ).map(passenger -> ReportCard.builder()
+            //TODO: GET THOSE VALUES
+            case "PASSENGER":{
+                return passengerRepo.findAll().stream().map(passenger -> ReportCard.builder()
+                        .id(passenger.getUser().getId())
                         .firstName(passenger.getUser().getFirstName())
                         .lastName(passenger.getUser().getLastName())
                         .phoneNumber(passenger.getUser().getPhoneNumber())
                         .photoURL(passenger.getUser().getPhotoUrl())
                         .nbrReport(passenger.getReportsCount())
                         .build()
-                );
+                ).collect(Collectors.toList());
             }
-            case ALL:{
+            case "ALL":{
                 //TODO: JOIN DRIVE AND PASSENGER
             }
         }
@@ -168,5 +182,10 @@ public class ReportServiceImpl implements ReportService {
            throw new ResourceNotFound("admin not found");
        }
        throw new ResourceNotFound("admin not found");
+    }
+
+    @Override
+    public List<RideReport> getAllReports() {
+        return rideReportRepo.findAll();
     }
 }

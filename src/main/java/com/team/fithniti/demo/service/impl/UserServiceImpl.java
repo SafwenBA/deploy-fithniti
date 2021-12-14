@@ -167,7 +167,8 @@ public class UserServiceImpl implements UserService {
             throw new ResourceExists("FOUND","Phone Number Exists Try another !") ;
         AppUser appUser = user.convertToAppUser() ;
         appUser.setState(UserState.ACTIVE);
-        appUser.setConfirmed(false);
+        appUser.setConfirmed(true);
+
         appUser.setAlertsCount(0);
         appUser.setLastConnectedAs(UserType.Passenger);
         if(appUser.getPhotoUrl() == null || appUser.getPhotoUrl().equals("")){
@@ -178,6 +179,12 @@ public class UserServiceImpl implements UserService {
         Optional<Role> userRole = roleRepo.getRoleByName("USER") ;
         userRole.ifPresent(appUser::setRole);
         userRepo.save(appUser);
+
+        //TODO:bullshit maybe delete
+        //AppUser appUser1 = (userRepo.findByPhoneNumber(appUser.getPhoneNumber()).get());
+        //appUser1.setId(UUID.randomUUID());
+        //userRepo.save(appUser1);
+
         // we assign a driver and a passenger objects relative to our AppUser object
         driverRepo.save(Driver.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
         passengerRepo.save(Passenger.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
@@ -190,7 +197,7 @@ public class UserServiceImpl implements UserService {
                 .verificationCode(String.valueOf((new Random().nextInt(9999999 - 1111111 + 1) + 1111111)))
                 .build() ;
         userRegistrationRequestRepo.save(request) ;
-        // send sms with twilio
+         //send sms with twilio
 //        twilioService.sendSms(SmsRequest.builder()
 //                        .phoneNumber(appUser.getPhoneNumber())
 //                        .message("Your <fiThniti> Account Verification Code is "

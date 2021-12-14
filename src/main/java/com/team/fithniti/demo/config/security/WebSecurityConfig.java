@@ -49,12 +49,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
+        //TODO: remove "/report" and below antmatchers
         http.authorizeRequests().antMatchers("/auth/**",
                         "/flickr/**",
-                        "/admin/auth/**",
+                        "/admin/auth/login",
                         "/api/v2/cars/**",
                         "/api/v2/car-models/**",
-                        "/tag/**")
+                        "/tag/**",
+                        "/report/**",
+                        "/rides/**",
+                        "/admin/ban/**",
+                        "/report/admin/**")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and().sessionManagement()

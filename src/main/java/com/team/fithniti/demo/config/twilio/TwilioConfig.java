@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 @NoArgsConstructor
 @Data
 public class TwilioConfig {
-    private final String SID = "AC4dd7968e5d405732a849163774a33af9";
-    private final String authToken ="ac60eba8c997e69c57ab64a5e5692daa" ;
-    private final String twilioPhoneNumber = "+14422591293";
+    private final String SID = "AC7b5c717f0cd01f577a46ae6b60a62f79";
+    private final String authToken ="e3dc4302c2a2032fd7ccbaf1ff29c0b" ;
+    private final String twilioPhoneNumber = "+17196243919";
 }

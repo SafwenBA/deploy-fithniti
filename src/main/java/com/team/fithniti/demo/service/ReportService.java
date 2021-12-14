@@ -7,6 +7,7 @@ import com.team.fithniti.demo.dto.response.ReportCard;
 import com.team.fithniti.demo.dto.response.ReportSubmitted;
 import com.team.fithniti.demo.dto.response.RideReportDTO;
 import com.team.fithniti.demo.model.HandledReport;
+import com.team.fithniti.demo.model.RideReport;
 import com.team.fithniti.demo.util.ReportFilter;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -23,10 +24,13 @@ public interface ReportService {
     //must be added to ReportHandle table
     HandledReportDTO createHandledReport(ReportHandler newReportHandled);//this method is consumed by admin service while handling report
     //get the list of user with report counter >= x
-    Page<ReportCard> getUserListWithReportCounter(int x, ReportFilter options);//TODO: consider having default value
+    List<ReportCard> getUserListWithReportCounter(int x, String options);//TODO: consider having default value
     //get all report for specific passenger
     Page<RideReportDTO> getAllPassengerReportsById(UUID passengerId, int page, int size, boolean sorted);
 
     //get all handled report by an admin
     List<HandledReportDTO> getAllReportsByAdmin(UUID adminId);
+
+    //get reports list
+    List<RideReport> getAllReports();
 }

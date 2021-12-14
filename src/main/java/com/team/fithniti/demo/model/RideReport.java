@@ -1,5 +1,6 @@
 package com.team.fithniti.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.team.fithniti.demo.util.ReportStatus;
 import com.team.fithniti.demo.util.ReportedBy;
 import lombok.*;
@@ -22,6 +23,7 @@ public class RideReport extends Auditable{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY, cascade = {
             CascadeType.PERSIST,
             CascadeType.MERGE})
