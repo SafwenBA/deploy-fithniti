@@ -52,6 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         //TODO: remove "/report" and below antmatchers
         http.authorizeRequests().antMatchers("/auth/**",
                         "/flickr/**",
+                        "/inbox/**",
                         "/admin/auth/login",
                         "/api/v2/cars/**",
                         "/api/v2/car-models/**",

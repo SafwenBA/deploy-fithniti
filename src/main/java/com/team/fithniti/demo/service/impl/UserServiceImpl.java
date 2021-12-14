@@ -74,6 +74,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private final AuthenticationManager authenticationManager;
 
+    @Autowired
+    private InboxRepo inboxRepo;
+
     @Override
     public List<AppUser> getAll() {
         return userRepo.findAll();
@@ -188,6 +191,13 @@ public class UserServiceImpl implements UserService {
         // we assign a driver and a passenger objects relative to our AppUser object
         driverRepo.save(Driver.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
         passengerRepo.save(Passenger.builder().user(appUser).rating(0f).ridesNumber(0).build()) ;
+
+        //adding inbox
+        inboxRepo.save(Inbox.builder()
+                .userId(appUser.getId())
+                .numberOfMessages(0)
+                .messages(new ArrayList<>())
+                .build());
 
         // we assign the registration code to the user
         UserRegistrationRequest request = UserRegistrationRequest.builder()
