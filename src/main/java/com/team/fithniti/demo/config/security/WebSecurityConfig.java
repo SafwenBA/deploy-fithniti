@@ -53,6 +53,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers("/auth/**",
                         "/flickr/**",
                         "/inbox/**",
+                        "/admin/user/**",
                         "/admin/auth/register",
                         "/admin/auth/login",
                         "/api/v2/cars/**",
