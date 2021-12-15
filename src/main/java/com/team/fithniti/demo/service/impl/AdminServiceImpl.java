@@ -131,6 +131,7 @@ public class AdminServiceImpl implements AdminService {
                 .photoUrl(userLogo)
                 .tokenExpirationDate(expiryDate)
                 .role(role)
+                .username(appuser.getFirstName() + " " + appuser .getLastName())
                 .build(),HttpStatus.OK);
     }
 
