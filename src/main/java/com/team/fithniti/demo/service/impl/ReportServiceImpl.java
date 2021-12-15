@@ -148,7 +148,7 @@ public class ReportServiceImpl implements ReportService {
                         .lastName(driver.getUser().getLastName())
                         .phoneNumber(driver.getUser().getPhoneNumber())
                         .photoURL(driver.getUser().getPhotoUrl())
-                        .nbrReport(driver.getReportsCount())
+                        .nbrReport(driver.getUser().getAlertsCount())
                         .build()
                 ).collect(Collectors.toList());
             }
@@ -160,7 +160,7 @@ public class ReportServiceImpl implements ReportService {
                         .lastName(passenger.getUser().getLastName())
                         .phoneNumber(passenger.getUser().getPhoneNumber())
                         .photoURL(passenger.getUser().getPhotoUrl())
-                        .nbrReport(passenger.getReportsCount())
+                        .nbrReport(passenger.getUser().getAlertsCount())
                         .build()
                 ).collect(Collectors.toList());
             }
