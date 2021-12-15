@@ -1,22 +1,13 @@
 package com.team.fithniti.demo.controller;
 
-import com.team.fithniti.demo.controller.api.ImageApi;
-import com.team.fithniti.demo.model.Image;
-import com.team.fithniti.demo.model.Logo;
 import com.team.fithniti.demo.service.ImageService;
 import com.team.fithniti.demo.service.impl.FlickrServiceImpl;
-import com.team.fithniti.demo.service.impl.ImageServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.Optional;
 import java.util.UUID;
 
 //TODO : Replace CrossOrigin with proxy file later!!

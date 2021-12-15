@@ -1,7 +1,6 @@
 package com.team.fithniti.demo.service;
 
 
-import com.team.fithniti.demo.model.Image;
 import com.team.fithniti.demo.model.Logo;
 import org.apache.commons.io.FileUtils;
 import org.springframework.web.multipart.MultipartFile;

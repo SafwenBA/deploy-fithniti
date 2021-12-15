@@ -2,7 +2,6 @@ package com.team.fithniti.demo.service.impl;
 
 import com.team.fithniti.demo.dto.request.NewImage;
 import com.team.fithniti.demo.dto.request.NewLogo;
-import com.team.fithniti.demo.model.Image;
 import com.team.fithniti.demo.model.Logo;
 import com.team.fithniti.demo.repository.ImageRepo;
 import com.team.fithniti.demo.repository.LogoRepo;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
