@@ -58,9 +58,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                         "/api/v2/car-models/**",
                         "/tag/**",
                         "/report/**",
-                        "/rides/**",
-                        "/admin/ban/**",
-                        "/report/admin/**")
+                        "/rides/**")
                 .permitAll()
                 .anyRequest().authenticated()
                 .and().sessionManagement()
