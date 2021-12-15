@@ -2,9 +2,11 @@ package com.team.fithniti.demo.service.impl;
 
 import com.team.fithniti.demo.dto.request.SendActionDTO;
 import com.team.fithniti.demo.dto.response.MessageSentDTO;
+import com.team.fithniti.demo.model.AppUser;
 import com.team.fithniti.demo.model.Inbox;
 import com.team.fithniti.demo.model.Message;
 import com.team.fithniti.demo.repository.InboxRepo;
+import com.team.fithniti.demo.repository.UserRepo;
 import com.team.fithniti.demo.service.InboxService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,11 +21,14 @@ public class InboxServiceImpl implements InboxService {
     @Autowired
     private InboxRepo inboxRepo;
 
+    @Autowired
+    private UserRepo userRepo;
+
     @Override
     public MessageSentDTO send(SendActionDTO sendActionDTO) {
         Optional<Inbox> inbox = inboxRepo.findByUserId(sendActionDTO.getReceiverId());
-
-        if(inbox.isPresent()){
+        Optional<AppUser> appUser = userRepo.findById(sendActionDTO.getSenderId()) ;
+        if(inbox.isPresent() && appUser.isPresent()){
             Inbox inboxToUpdate = inbox.get();
 
             Message message = Message.builder()
@@ -31,6 +36,8 @@ public class InboxServiceImpl implements InboxService {
                     .senderId(sendActionDTO.getSenderId())
                     .messageDate(LocalDate.now())
                     .content(sendActionDTO.getContent())
+                    .senderName(appUser.get().getFirstName()+" "+appUser.get().getLastName())
+                    .senderLogoUrl(appUser.get().getPhotoUrl())
                     .build();
 
             List<Message> messagesToUpdate = inboxToUpdate.getMessages();
@@ -45,9 +52,9 @@ public class InboxServiceImpl implements InboxService {
 
             inboxRepo.save(inboxToUpdate);
 
-          return MessageSentDTO.builder().message("sent!").build();
+            return MessageSentDTO.builder().message("sent!").build();
         }else{
-             return MessageSentDTO.builder().message("User not found!").build();
+            return MessageSentDTO.builder().message("User not found!").build();
         }
     }
 

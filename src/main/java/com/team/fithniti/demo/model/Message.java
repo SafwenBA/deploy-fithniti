@@ -25,4 +25,7 @@ public class Message {
     private UUID senderId;
     private String content;
     private LocalDate messageDate;
+
+    private String senderLogoUrl ;
+    private String senderName ;
 }
